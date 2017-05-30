@@ -3,6 +3,7 @@ const uuid = require('uuid');
 const { expect } = require('chai');
 const auth = require('./auth-service');
 const OperationError = require('../libs/operations/operation-error');
+const { COLLECTIONS } = require('../libs/repository/model/meta');
 
 
 
@@ -24,7 +25,10 @@ describe('Credentials', function(){
       // *Adding a valid credential:
       return auth.get().credentials.add(application, username, password)
          .then(result => {
-            expect(result).to.have.property('_id');
+            // *Requiring the Credential model:
+            const Credential = require('mongoose').model(COLLECTIONS.CREDENTIAL);
+            // *Expecting the result to be a Credential object:
+            expect(result).to.be.instanceof(Credential);
          });
    });
 

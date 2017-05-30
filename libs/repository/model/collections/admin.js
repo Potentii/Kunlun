@@ -1,3 +1,5 @@
+// *Getting the schemas names:
+const { COLLECTIONS } = require('../meta');
 
 
 
@@ -14,6 +16,11 @@ module.exports = Schema => {
       },
 
       password: {
+         type: String,
+         required: true
+      },
+
+      salt: {
          type: String,
          required: true
       },

@@ -25,6 +25,7 @@ function deploy(database_options, settings){
    })
    .then(mongoose => {
       return {
+         admins: require('./operations/admins')(mongoose, settings),
          credentials: require('./operations/credentials')(mongoose, settings),
          settings
       };
