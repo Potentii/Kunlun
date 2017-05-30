@@ -29,6 +29,7 @@ function deploy(database_options, settings){
          applications: require('./operations/applications')(mongoose, settings.applications),
          credentials:  require('./operations/credentials')(mongoose, settings.credentials),
          challenges:   require('./operations/challenges')(mongoose, settings.challenges),
+         accesses:     require('./operations/accesses')(mongoose, settings.accesses),
          settings
       };
    });
