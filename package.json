@@ -1,0 +1,19 @@
+{
+  "name": "auth-core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "mocha ./tests/main.js"
+  },
+  "author": "Guilherme Reginaldo Ruella <potentii@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "mongoose": "4.9.9",
+    "uuid": "3.0.1"
+  },
+  "devDependencies": {
+    "chai": "3.5.0",
+    "mocha": "3.4.1"
+  }
+}
