@@ -29,7 +29,8 @@ describe('operations', function(){
    });
 
 
-   require('./admin');
+   require('./admins');
+   require('./applications');
    require('./credentials');
 
 });

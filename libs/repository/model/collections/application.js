@@ -17,7 +17,11 @@ module.exports = Schema => {
       token: {
          type: String,
          required: true,
-         match: [/^[\w\d]{8}\-[\w\d]{4}\-[\w\d]{4}\-[\w\d]{4}\-[\w\d]{12}$/i, 'Invalid token. It must be an UUID-V4 string.']
+      },
+
+      salt: {
+         type: String,
+         required: true
       },
 
       date: {

@@ -61,6 +61,7 @@ module.exports = mongoose => {
       // *Hashing the password using the generated salt:
       const hashed_password = cry.hash('utf8', 'hex', 'sha256', salt + password);
 
+      // *Adding a new admin user:
       return new Admin({ username, password: hashed_password, salt })
          .save()
          .catch(err => {
@@ -80,7 +81,6 @@ module.exports = mongoose => {
                // *Checking the error kinds for username:
                if(err.errors.username.kind === 'required')
                   throw new OperationError('EUSERNAME.MISSING');
-
             }
 
             // *Throwing the error again, as it wasn't expected:
