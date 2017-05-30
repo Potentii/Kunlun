@@ -1,11 +1,19 @@
 const database = require('./repository/database');
 
 
+function deploy(database_options, settings){
 
-function deploy(database_options, username_options, password_options){
-   const settings = {
-      username: username_options,
-      password: password_options
+   settings = {
+      credentials: {
+         username: {
+            min_length: settings.credentials_username_min_length,
+            max_length: settings.credentials_username_max_length
+         },
+         password: {
+            min_length: settings.credentials_password_min_length,
+            max_length: settings.credentials_password_max_length
+         }
+      }
    };
 
    return database.connectAndSync({
@@ -17,7 +25,8 @@ function deploy(database_options, username_options, password_options){
    })
    .then(mongoose => {
       return {
-         credentials: require('./operations/credentials')(mongoose, settings)
+         credentials: require('./operations/credentials')(mongoose, settings),
+         settings
       };
    });
 }
