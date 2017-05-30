@@ -12,7 +12,7 @@ module.exports = Schema => {
       salt: {
          type: String,
          required: true,
-         match: [/^[\w\d]{8}\-[\w\d]{4}\-[\w\d]{4}\-[\w\d]{4}\-[\w\d]{12}$/i, 'Invalid salt. It must be an UUID-V4 string.']
+         match: [/^[a-f0-9]{8}\-[a-f0-9]{4}\-4[a-f0-9]{3}\-[a-f0-9]{4}\-[a-f0-9]{12}$/i, 'Invalid salt. It must be an UUID-V4 string.']
       },
 
       _credential: {

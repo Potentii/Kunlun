@@ -3,7 +3,6 @@ const uuid = require('uuid');
 const { expect } = require('chai');
 const auth = require('./auth-service');
 const OperationError = require('../libs/operations/operation-error');
-const { COLLECTIONS } = require('../libs/repository/model/meta');
 
 
 
@@ -20,10 +19,8 @@ describe('Admin', function(){
       // *Adding a valid admin:
       return auth.get().admins.add(undefined, username, password)
          .then(result => {
-            // *Requiring the Admin model:
-            const Admin = require('mongoose').model(COLLECTIONS.ADMIN);
-            // *Expecting the result to be an Admin object:
-            expect(result).to.be.instanceof(Admin);
+            // *Expecting the result to have an id:
+            expect(result).to.have.property('id');
          });
    });
 

@@ -3,7 +3,6 @@ const uuid = require('uuid');
 const { expect } = require('chai');
 const auth = require('./auth-service');
 const OperationError = require('../libs/operations/operation-error');
-const { COLLECTIONS } = require('../libs/repository/model/meta');
 
 
 
@@ -17,10 +16,11 @@ describe('Application', function(){
       // *Adding a valid application:
       return auth.get().applications.add(undefined, name)
          .then(result => {
-            // *Requiring the Application model:
-            const Application = require('mongoose').model(COLLECTIONS.APPLICATION);
-            // *Expecting the result to be an Application object:
-            expect(result).to.be.instanceof(Application);
+            // *Expecting the result to have an id:
+            expect(result).to.have.property('id');
+            // *Expecting the result to have the generated token:
+            expect(result).to.have.property('token');
+            expect(result.token).to.match(/^[a-f0-9]{8}\-[a-f0-9]{4}\-4[a-f0-9]{3}\-[a-f0-9]{4}\-[a-f0-9]{12}$/i);
          });
    });
 

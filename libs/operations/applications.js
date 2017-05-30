@@ -34,6 +34,9 @@ module.exports = mongoose => {
       // *Adding a new client application:
       return new Application({ name, token: hashed_token, salt })
          .save()
+         .then(application_created => {
+            return { id: application_created._id, token };
+         })
          .catch(err => {
             // *Checking if the error has been thrown by the database:
             if(err.name === 'MongoError'){

@@ -64,6 +64,9 @@ module.exports = mongoose => {
       // *Adding a new admin user:
       return new Admin({ username, password: hashed_password, salt })
          .save()
+         .then(admin_created => {
+            return { id: admin_created._id };
+         })
          .catch(err => {
             // *Checking if the error has been thrown by the database:
             if(err.name === 'MongoError'){

@@ -40,6 +40,9 @@ module.exports = (mongoose, settings) => {
          // *Adding a new credential:
          return new Credential({ username, password: hashed_password, _application: application._id, salt })
             .save()
+            .then(credential_created => {
+               return { id: credential_created._id };
+            })
             .catch(err => {
                // *Checking if the error has been thrown by the database:
                if(err.name === 'MongoError'){
