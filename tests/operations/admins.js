@@ -1,8 +1,8 @@
 // *Getting the needed modules:
 const uuid = require('uuid');
 const { expect } = require('chai');
-const auth = require('./auth-service');
-const OperationError = require('../libs/operations/operation-error');
+const auth = require('../tools/auth-service');
+const OperationError = require('../../libs/operations/operation-error');
 
 
 

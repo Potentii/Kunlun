@@ -1,7 +1,5 @@
 // *Getting the needed modules:
-const { expect } = require('chai');
-const auth = require('./auth-service');
-const OperationError = require('../libs/operations/operation-error');
+const auth = require('./tools/auth-service');
 
 
 
@@ -29,8 +27,8 @@ describe('operations', function(){
    });
 
 
-   require('./admins');
-   require('./applications');
-   require('./credentials');
+   require('./operations/admins');
+   require('./operations/applications');
+   require('./operations/credentials');
 
 });
