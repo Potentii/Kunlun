@@ -6,7 +6,13 @@ const { COLLECTIONS } = require('../repository/model/meta');
 
 
 
-module.exports = mongoose => {
+/**
+ * Builds the applications operations
+ * @param  {Mongoose} mongoose The mongoose instance
+ * @param  {Object} settings   The settings to configure the applications operations
+ * @return {Object}            The available operations object
+ */
+module.exports = (mongoose, settings) => {
    // *Getting the collections models:
    const Application = mongoose.model(COLLECTIONS.APPLICATION);
 

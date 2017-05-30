@@ -25,9 +25,10 @@ function deploy(database_options, settings){
    })
    .then(mongoose => {
       return {
-         admins: require('./operations/admins')(mongoose, settings),
-         applications: require('./operations/applications')(mongoose, settings),
-         credentials: require('./operations/credentials')(mongoose, settings),
+         admins:       require('./operations/admins')(mongoose, settings.admins),
+         applications: require('./operations/applications')(mongoose, settings.applications),
+         credentials:  require('./operations/credentials')(mongoose, settings.credentials),
+         challenges:   require('./operations/challenges')(mongoose, settings.challenges),
          settings
       };
    });

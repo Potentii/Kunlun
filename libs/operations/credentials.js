@@ -9,7 +9,7 @@ const { COLLECTIONS } = require('../repository/model/meta');
 /**
  * Builds the credentials operations
  * @param  {Mongoose} mongoose The mongoose instance
- * @param  {Object} settings   The setting top configure the credentials operations
+ * @param  {Object} settings   The settings to configure the credentials operations
  * @return {Object}            The available operations object
  */
 module.exports = (mongoose, settings) => {
@@ -20,16 +20,16 @@ module.exports = (mongoose, settings) => {
 
    /**
     * Creates a new user credential in the database
-    * @param  {Application} application         The application that owns this user credentials
-    * @param  {String} username                 The credentials username (must be unique)
-    * @param  {String} password                 The credentials password
-    * @return {Promise<OperationResult, Error>} A promise containing the operation result or an error
+    * @param  {Application} application The application that owns this user credentials
+    * @param  {String} username         The credentials username (must be unique)
+    * @param  {String} password         The credentials password
+    * @return {Promise}                 A promise containing the operation result or an error
     */
    function add(application, username, password){
       try{
          // *Validating the username and password against the configured settings:
-         validateUsername(username, settings.credentials.username);
-         validatePassword(password, settings.credentials.password);
+         validateUsername(username, settings.username);
+         validatePassword(password, settings.password);
 
          // *Generating the password hash salt:
          const salt = uuid.v4();
