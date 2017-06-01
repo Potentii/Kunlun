@@ -1,7 +1,8 @@
 // *Requiring the needed modules:
 const uuid = require('uuid');
-const OperationError = require('../operations/operation-error');
+const OperationError = require('../tools/operation-error');
 const { COLLECTIONS } = require('../repository/model/meta');
+const { OP_ERR_CODES } = require('../tools/operation-error-codes');
 
 
 
@@ -39,11 +40,11 @@ module.exports = (mongoose, settings) => {
                         return credential_found;
 
                      // *Throwing an operation error, as the access check have failed:
-                     throw new OperationError('EACCESS.CHECK', 'Invalid access token');
+                     throw new OperationError(OP_ERR_CODES.ACCESS.CHECK, 'Invalid access token');
                   });
 
             // *Throwing an operation error, as the access check have failed:
-            throw new OperationError('EACCESS.CHECK', 'Invalid access username');
+            throw new OperationError(OP_ERR_CODES.ACCESS.CHECK, 'Invalid access username');
          });
    }
 

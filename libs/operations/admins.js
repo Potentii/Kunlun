@@ -1,8 +1,9 @@
 // *Requiring the needed modules:
 const uuid = require('uuid');
 const cry = require('../tools/cry');
-const OperationError = require('../operations/operation-error');
+const OperationError = require('../tools/operation-error');
 const { COLLECTIONS } = require('../repository/model/meta');
+const { OP_ERR_CODES } = require('../tools/operation-error-codes');
 
 
 
@@ -44,7 +45,7 @@ module.exports = (mongoose, settings) => {
             }
 
             // *Throwing an operation error, as the admin check have failed:
-            throw new OperationError('EADMIN.CHECK', 'Invalid admin credentials');
+            throw new OperationError(OP_ERR_CODES.ADMIN.CHECK, 'Invalid admin credentials');
          });
    }
 
@@ -80,7 +81,7 @@ module.exports = (mongoose, settings) => {
                // *Checking the error code:
                switch(err.code){
                   // *If the username already exists:
-                  case 11000: throw new OperationError('EUSERNAME.EXISTS');
+                  case 11000: throw new OperationError(OP_ERR_CODES.ADMIN.USERNAME.EXISTS);
                }
             }
 
@@ -89,7 +90,7 @@ module.exports = (mongoose, settings) => {
                // *If it has:
                // *Checking the error kinds for username:
                if(err.errors.username.kind === 'required')
-                  throw new OperationError('EUSERNAME.MISSING');
+                  throw new OperationError(OP_ERR_CODES.ADMIN.USERNAME.MISSING);
             }
 
             // *Throwing the error again, as it wasn't expected:

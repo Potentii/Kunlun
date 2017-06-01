@@ -2,7 +2,7 @@
 const uuid = require('uuid');
 const { expect } = require('chai');
 const auth = require('../tools/auth-service');
-const OperationError = require('../../libs/operations/operation-error');
+const OperationError = require('../../libs/tools/operation-error');
 
 
 

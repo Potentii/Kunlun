@@ -1,9 +1,9 @@
 /**
- * Represents some business logic failure
+ * Represents a business logic failure
  */
-class OperationError extends Error {
+class OperationError extends Error{
 
-   constructor(code, message) {
+   constructor(code, message){
       super(message);
       this._code = code;
    }
@@ -13,4 +13,7 @@ class OperationError extends Error {
    }
 }
 
+
+
+// *Exporting this class:
 module.exports = OperationError;

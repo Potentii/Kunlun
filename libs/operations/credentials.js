@@ -1,8 +1,9 @@
 // *Requiring the needed modules:
 const uuid = require('uuid');
 const cry = require('../tools/cry');
-const OperationError = require('../operations/operation-error');
+const OperationError = require('../tools/operation-error');
 const { COLLECTIONS } = require('../repository/model/meta');
+const { OP_ERR_CODES } = require('../tools/operation-error-codes');
 
 
 
@@ -50,7 +51,7 @@ module.exports = (mongoose, settings) => {
                   // *Checking the error code:
                   switch(err.code){
                      // *If the username already exists:
-                     case 11000: throw new OperationError('EUSERNAME.EXISTS');
+                     case 11000: throw new OperationError(OP_ERR_CODES.CREDENTIALS.USERNAME.EXISTS);
                   }
                }
 
@@ -75,17 +76,17 @@ module.exports = (mongoose, settings) => {
    function validateUsername(username, settings){
       // *Throwing an operation error if the username isn't a string:
       if(typeof username !== 'string')
-         throw new OperationError('EUSERNAME.TYPE', 'Username must be a string');
+         throw new OperationError(OP_ERR_CODES.CREDENTIALS.USERNAME.TYPE, 'Username must be a string');
 
       // *Returning if there isn't any settings:
       if(!settings) return;
 
       // *Throwing an operation error if the username is too short:
       if(settings.min_length !== undefined && username.length < settings.min_length)
-         throw new OperationError('EUSERNAME.LENGTH', 'Username is too short, it must have at least ' + settings.min_length + ' characters');
+         throw new OperationError(OP_ERR_CODES.CREDENTIALS.USERNAME.LENGTH, 'Username is too short, it must have at least ' + settings.min_length + ' characters');
       // *Throwing an operation error if the username is too long:
       if(settings.max_length !== undefined && username.length > settings.max_length)
-         throw new OperationError('EUSERNAME.LENGTH', 'Username is too long, it must have at most ' + settings.max_length + ' characters');
+         throw new OperationError(OP_ERR_CODES.CREDENTIALS.USERNAME.LENGTH, 'Username is too long, it must have at most ' + settings.max_length + ' characters');
    }
 
 
@@ -100,17 +101,17 @@ module.exports = (mongoose, settings) => {
    function validatePassword(password, settings){
       // *Throwing an operation error if the password isn't a string:
       if(typeof password !== 'string')
-         throw new OperationError('EPASSWORD.TYPE', 'Password must be a string');
+         throw new OperationError(OP_ERR_CODES.CREDENTIALS.PASSWORD.TYPE, 'Password must be a string');
 
       // *Returning if there isn't any settings:
       if(!settings) return;
 
       // *Throwing an operation error if the password is too short:
       if(settings.min_length !== undefined && password.length < settings.min_length)
-         throw new OperationError('EPASSWORD.LENGTH', 'Password is too short, it must have at least ' + settings.min_length + ' characters');
+         throw new OperationError(OP_ERR_CODES.CREDENTIALS.PASSWORD.LENGTH, 'Password is too short, it must have at least ' + settings.min_length + ' characters');
       // *Throwing an operation error if the password is too long:
       if(settings.max_length !== undefined && password.length > settings.max_length)
-         throw new OperationError('EPASSWORD.LENGTH', 'Password is too long, it must have at most ' + settings.max_length + ' characters');
+         throw new OperationError(OP_ERR_CODES.CREDENTIALS.PASSWORD.LENGTH, 'Password is too long, it must have at most ' + settings.max_length + ' characters');
    }
 
 
