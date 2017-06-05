@@ -37,7 +37,7 @@ describe('Application', function(){
          .then(() => new Error())
          .catch(err => {
             expect(err).to.be.instanceof(OperationError);
-            expect(err.code).to.be.equal('ENAME.MISSING');
+            expect(err.code).to.be.equal('EAPPLICATION.NAME.MISSING');
 
          });
       });
@@ -55,7 +55,7 @@ describe('Application', function(){
                   .then(() => new Error())
                   .catch(err => {
                      expect(err).to.be.instanceof(OperationError);
-                     expect(err.code).to.be.equal('ENAME.EXISTS');
+                     expect(err.code).to.be.equal('EAPPLICATION.NAME.EXISTS');
                   });
             });
       });

@@ -30,5 +30,5 @@ describe('operations', function(){
    require('./operations/admins');
    require('./operations/applications');
    require('./operations/credentials');
-
+   require('./operations/challenges');
 });

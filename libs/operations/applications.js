@@ -36,7 +36,7 @@ module.exports = (mongoose, settings) => {
       const salt = uuid.v4();
 
       // *Hashing the token using the generated salt:
-      const hashed_token = cry.hash('utf8', 'hex', 'sha256', salt + token);
+      const hashed_token = cry.hashSync('sha256', salt + token).toString('hex');
 
       // *Adding a new client application:
       return new Application({ name, token: hashed_token, salt })

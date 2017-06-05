@@ -26,7 +26,8 @@ module.exports = (mongoose, settings) => {
     * @param  {String} password         The credentials password
     * @return {Promise}                 A promise containing the operation result or an error
     */
-   function add(application, username, password){
+   function add(application, username, password, client_secret){
+      // TODO check and document client_secret
       try{
          // *Validating the username and password against the configured settings:
          validateUsername(username, settings.username);
@@ -35,11 +36,32 @@ module.exports = (mongoose, settings) => {
          // *Generating the password hash salt:
          const salt = uuid.v4();
 
+         // *Setting the iteration count for the key stretching function:
+         const it = 4096;
+
          // *Hashing the password using the generated salt:
-         const hashed_password = cry.hash('utf8', 'hex', 'sha256', salt + password);
+         const hashed_password = cry.pbkdf2Sync('sha256', 256, new Buffer(password, 'utf8'), new Buffer(salt, 'utf8'), it);
+
+         // *Computing the client key and its hashed version:
+         const client_key = cry.hmacSync('sha256', new Buffer(client_secret, 'utf8'), hashed_password);
+         // *Getting the hashed version of the client key to be stored:
+         const hashed_client_key = cry.hashSync('sha256', client_key);
+
+         // *Generating a random server secret:
+         const server_secret = uuid.v4();
+         // *Computing the server key:
+         const server_key = cry.hmacSync('sha256', new Buffer(server_secret, 'utf8'), hashed_password);
 
          // *Adding a new credential:
-         return new Credential({ username, password: hashed_password, _application: application._id, salt })
+         return new Credential({
+               username,
+               password: hashed_password.toString('hex'),
+               salt,
+               it,
+               client_key: hashed_client_key.toString('hex'),
+               server_secret,
+               _application: application._id
+            })
             .save()
             .then(credential_created => {
                return { id: credential_created._id };

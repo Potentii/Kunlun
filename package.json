@@ -1,19 +1,43 @@
 {
-  "name": "auth-core",
+  "name": "kunlun-core",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
-  "scripts": {
-    "test": "mocha ./tests/operations.js"
-  },
-  "author": "Guilherme Reginaldo Ruella <potentii@gmail.com>",
-  "license": "MIT",
+  "files": [
+    "LICENSE.txt",
+    "main.js",
+    "libs/",
+    "tests/"
+  ],
   "dependencies": {
-    "mongoose": "4.9.9",
+    "buffer-xor": "2.0.1",
+    "mongoose": "4.10.4",
     "uuid": "3.0.1"
   },
   "devDependencies": {
-    "chai": "3.5.0",
-    "mocha": "3.4.1"
-  }
+    "chai": "4.0.1",
+    "mocha": "3.4.2"
+  },
+  "scripts": {
+    "test": "mocha ./tests/all.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Potentii/Kunlun-Core.git"
+  },
+  "keywords": [
+    "auth",
+    "authentication",
+    "authorization",
+    "scram",
+    "oauth",
+    "token",
+    "service"
+  ],
+  "author": "Guilherme Reginaldo Ruella <potentii@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Potentii/Kunlun-Core/issues"
+  },
+  "homepage": "https://github.com/Potentii/Kunlun-Core#readme"
 }
