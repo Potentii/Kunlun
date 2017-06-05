@@ -41,19 +41,81 @@ function decrypt(message_encoding, encryption_type, algorithm, encrypted, secret
 
 /**
  * Hashes a message
- * @param  {string} message_encoding The input message encoding (e.g. utf8, ascii, latin1)
- * @param  {string} hash_type        The hash output type (e.g. hex, base64, latin1)
- * @param  {string} algorithm        The hash algorithm to be used (e.g sha256)
- * @param  {string} message          The input message to be hashed
- * @return {string}                  The hashed digest
+ * @param  {string} algorithm The hash algorithm to be used (e.g sha256)
+ * @param  {Buffer} message   The input message to be hashed
+ * @return {Buffer}           The hashed digest
  */
-function hash(message_encoding, hash_type, algorithm, message){
+function hash(algorithm, message){
+   return new Promise((resolve, reject) => {
+      const hash = crypto.createHash(algorithm);
+
+      hash.on('readable', () => {
+         resolve(hash.read());
+      });
+
+      hash.write(message);
+      hash.end();
+   });
+}
+
+
+
+function hashSync(algorithm, message){
    const hash = crypto.createHash(algorithm);
-   hash.update(message, message_encoding);
-   return hash.digest(hash_type);
+   hash.update(message);
+   return hash.digest();
+}
+
+
+
+function hmac(algorithm, message, secret){
+   return new Promise((resolve, reject) => {
+      const hmac = crypto.createHmac(algorithm, secret);
+
+      hmac.on('readable', () => {
+         resolve(hmac.read());
+      });
+
+      hmac.write(message);
+      hmac.end();
+   });
+}
+
+
+
+function hmacSync(algorithm, message, secret){
+   const hmac = crypto.createHmac(algorithm, secret);
+   hmac.update(message);
+   return hmac.digest();
+}
+
+
+
+function pbkdf2(algorithm, length, message, salt, i){
+   return new Promise((resolve, reject) => {
+      crypto.pbkdf2(message, salt, i, length, algorithm, (err, derived) => {
+         if(err) return reject(err);
+         resolve(derived);
+      });
+   });
+}
+
+
+
+function pbkdf2Sync(algorithm, length, message, salt, i){
+   return crypto.pbkdf2Sync(message, salt, i, length, algorithm);
 }
 
 
 
 // *Exporting this module:
-module.exports = { encrypt, decrypt, hash };
+module.exports = {
+   encrypt,
+   decrypt,
+   hash,
+   hashSync, 
+   hmac,
+   hmacSync,
+   pbkdf2,
+   pbkdf2Sync
+};

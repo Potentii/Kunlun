@@ -8,6 +8,8 @@ const OperationError = require('../../libs/tools/operation-error');
 
 describe('Credentials', function(){
    const SIMPLE_PASSWORD = 'abc';
+   // *Generating a default random client secret:
+   const client_secret = uuid.v4();
 
    // TODO unmock this application instance:
    let application = {
@@ -22,7 +24,7 @@ describe('Credentials', function(){
       const password = SIMPLE_PASSWORD;
 
       // *Adding a valid credential:
-      return auth.get().credentials.add(application, username, password)
+      return auth.get().credentials.add(application, username, password, client_secret)
          .then(result => {
             // *Expecting the result to have an id:
             expect(result).to.have.property('id');
@@ -39,13 +41,13 @@ describe('Credentials', function(){
          const password = SIMPLE_PASSWORD;
 
          // *Adding a credential without username:
-         return auth.get().credentials.add(application, username, password)
-         // *Throwing an error, as this operation should not have been successful:
-         .then(() => new Error())
-         .catch(err => {
-            expect(err).to.be.instanceof(OperationError);
-            expect(err.code).to.be.equal('EUSERNAME.TYPE');
-         });
+         return auth.get().credentials.add(application, username, password, client_secret)
+            // *Throwing an error, as this operation should not have been successful:
+            .then(() => new Error())
+            .catch(err => {
+               expect(err).to.be.instanceof(OperationError);
+               expect(err.code).to.be.equal('ECREDENTIAL.USERNAME.TYPE');
+            });
       });
 
 
@@ -56,14 +58,15 @@ describe('Credentials', function(){
          const password = SIMPLE_PASSWORD;
 
          // *Adding a valid credential:
-         return auth.get().credentials.add(application, username, password)
+         return auth.get().credentials.add(application, username, password, client_secret)
             .then(result => {
-               return auth.get().credentials.add(application, username, password)
+               // *Assing the same credential:
+               return auth.get().credentials.add(application, username, password, client_secret)
                   // *Throwing an error, as this operation should not have been successful:
                   .then(() => new Error())
                   .catch(err => {
                      expect(err).to.be.instanceof(OperationError);
-                     expect(err.code).to.be.equal('EUSERNAME.EXISTS');
+                     expect(err.code).to.be.equal('ECREDENTIAL.USERNAME.EXISTS');
                   });
             });
       });
@@ -80,13 +83,13 @@ describe('Credentials', function(){
          }
 
          // *Adding a credential with a short username:
-         return auth.get().credentials.add(application, username, password)
-         // *Throwing an error, as this operation should not have been successful:
-         .then(() => new Error())
-         .catch(err => {
-            expect(err).to.be.instanceof(OperationError);
-            expect(err.code).to.be.equal('EUSERNAME.LENGTH');
-         });
+         return auth.get().credentials.add(application, username, password, client_secret)
+            // *Throwing an error, as this operation should not have been successful:
+            .then(() => new Error())
+            .catch(err => {
+               expect(err).to.be.instanceof(OperationError);
+               expect(err.code).to.be.equal('ECREDENTIAL.USERNAME.LENGTH');
+            });
       });
 
 
@@ -101,13 +104,13 @@ describe('Credentials', function(){
          }
 
          // *Adding a credential with a long username:
-         return auth.get().credentials.add(application, username, password)
-         // *Throwing an error, as this operation should not have been successful:
-         .then(() => new Error())
-         .catch(err => {
-            expect(err).to.be.instanceof(OperationError);
-            expect(err.code).to.be.equal('EUSERNAME.LENGTH');
-         });
+         return auth.get().credentials.add(application, username, password, client_secret)
+            // *Throwing an error, as this operation should not have been successful:
+            .then(() => new Error())
+            .catch(err => {
+               expect(err).to.be.instanceof(OperationError);
+               expect(err.code).to.be.equal('ECREDENTIAL.USERNAME.LENGTH');
+            });
       });
 
    });
@@ -122,13 +125,13 @@ describe('Credentials', function(){
          const password = undefined;
 
          // *Adding a credential without password:
-         return auth.get().credentials.add(application, username, password)
-         // *Throwing an error, as this operation should not have been successful:
-         .then(() => new Error())
-         .catch(err => {
-            expect(err).to.be.instanceof(OperationError);
-            expect(err.code).to.be.equal('EPASSWORD.TYPE');
-         });
+         return auth.get().credentials.add(application, username, password, client_secret)
+            // *Throwing an error, as this operation should not have been successful:
+            .then(() => new Error())
+            .catch(err => {
+               expect(err).to.be.instanceof(OperationError);
+               expect(err.code).to.be.equal('ECREDENTIAL.PASSWORD.TYPE');
+            });
       });
 
 
@@ -143,13 +146,13 @@ describe('Credentials', function(){
          }
 
          // *Adding a credential with a short password:
-         return auth.get().credentials.add(application, username, password)
-         // *Throwing an error, as this operation should not have been successful:
-         .then(() => new Error())
-         .catch(err => {
-            expect(err).to.be.instanceof(OperationError);
-            expect(err.code).to.be.equal('EPASSWORD.LENGTH');
-         });
+         return auth.get().credentials.add(application, username, password, client_secret)
+            // *Throwing an error, as this operation should not have been successful:
+            .then(() => new Error())
+            .catch(err => {
+               expect(err).to.be.instanceof(OperationError);
+               expect(err.code).to.be.equal('ECREDENTIAL.PASSWORD.LENGTH');
+            });
       });
 
 
@@ -164,13 +167,13 @@ describe('Credentials', function(){
          }
 
          // *Adding a credential with a long password:
-         return auth.get().credentials.add(application, username, password)
-         // *Throwing an error, as this operation should not have been successful:
-         .then(() => new Error())
-         .catch(err => {
-            expect(err).to.be.instanceof(OperationError);
-            expect(err.code).to.be.equal('EPASSWORD.LENGTH');
-         });
+         return auth.get().credentials.add(application, username, password, client_secret)
+            // *Throwing an error, as this operation should not have been successful:
+            .then(() => new Error())
+            .catch(err => {
+               expect(err).to.be.instanceof(OperationError);
+               expect(err.code).to.be.equal('ECREDENTIAL.PASSWORD.LENGTH');
+            });
       });
 
    });

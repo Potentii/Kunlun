@@ -35,7 +35,7 @@ module.exports = (mongoose, settings) => {
             if(admin_found){
                // *If there is:
                // *Salting and hashing the given password:
-               const hashed_given_password = cry.hash('utf8', 'hex', 'sha256', admin_found.salt + password);
+               const hashed_given_password = cry.hashSync('sha256', admin_found.salt + password).toString('hex');
                // *Checking if the hashes matches:
                // TODO do this with length constant comparison:
                if(admin_found.password === hashed_given_password)
@@ -66,7 +66,7 @@ module.exports = (mongoose, settings) => {
       const salt = uuid.v4();
 
       // *Hashing the password using the generated salt:
-      const hashed_password = cry.hash('utf8', 'hex', 'sha256', salt + password);
+      const hashed_password = cry.hashSync('sha256', salt + password).toString('hex');
 
       // *Adding a new admin user:
       return new Admin({ username, password: hashed_password, salt })

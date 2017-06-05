@@ -39,7 +39,7 @@ describe('Admin', function(){
          .then(() => new Error())
          .catch(err => {
             expect(err).to.be.instanceof(OperationError);
-            expect(err.code).to.be.equal('EUSERNAME.MISSING');
+            expect(err.code).to.be.equal('EADMIN.USERNAME.MISSING');
 
          });
       });
@@ -59,7 +59,7 @@ describe('Admin', function(){
                   .then(() => new Error())
                   .catch(err => {
                      expect(err).to.be.instanceof(OperationError);
-                     expect(err.code).to.be.equal('EUSERNAME.EXISTS');
+                     expect(err.code).to.be.equal('EADMIN.USERNAME.EXISTS');
                   });
             });
       });
@@ -81,7 +81,7 @@ describe('Admin', function(){
          .then(() => new Error())
          .catch(err => {
             expect(err).to.be.instanceof(OperationError);
-            expect(err.code).to.be.equal('EPASSWORD.MISSING');
+            expect(err.code).to.be.equal('EADMIN.PASSWORD.MISSING');
          });
       });
 
