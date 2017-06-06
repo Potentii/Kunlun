@@ -1,9 +1,9 @@
 // *Requiring the needed modules:
 const uuid = require('uuid');
 const cry = require('../tools/cry');
-const OperationError = require('../tools/operation-error');
+const KunlunError = require('../errors/kunlun');
 const { COLLECTIONS } = require('../repository/model/meta');
-const { OP_ERR_CODES } = require('../tools/operation-error-codes');
+const { KUNLUN_ERR_CODES } = require('../errors/codes');
 
 
 
@@ -44,8 +44,8 @@ module.exports = (mongoose, settings) => {
                   return admin_found;
             }
 
-            // *Throwing an operation error, as the admin check have failed:
-            throw new OperationError(OP_ERR_CODES.ADMIN.CHECK, 'Invalid admin credentials');
+            // *Throwing a kunlun error, as the admin check have failed:
+            throw new KunlunError(KUNLUN_ERR_CODES.ADMIN.CHECK, 'Invalid admin credentials');
          });
    }
 
@@ -58,9 +58,9 @@ module.exports = (mongoose, settings) => {
     * @param {String} password The new admin password
     */
    function add(admin, username, password){
-      // *Rejecting into an operation error, if the password is not a string:
+      // *Rejecting into an kunlun error, if the password is not a string:
       if(typeof password !== 'string')
-         return Promise.reject(new OperationError(OP_ERR_CODES.ADMIN.PASSWORD.TYPE, 'The password must be a string'));
+         return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.ADMIN.PASSWORD.TYPE, 'The password must be a string'));
 
 
       // TODO create an '_admin' field in Admin collection, so the admin creator can be referenced
@@ -85,7 +85,7 @@ module.exports = (mongoose, settings) => {
                // *Checking the error code:
                switch(err.code){
                   // *If the username already exists:
-                  case 11000: throw new OperationError(OP_ERR_CODES.ADMIN.USERNAME.EXISTS);
+                  case 11000: throw new KunlunError(KUNLUN_ERR_CODES.ADMIN.USERNAME.EXISTS);
                }
             }
 
@@ -94,7 +94,7 @@ module.exports = (mongoose, settings) => {
                // *If it has:
                // *Checking the error kinds for username:
                if(err.errors.username.kind === 'required')
-                  throw new OperationError(OP_ERR_CODES.ADMIN.USERNAME.MISSING);
+                  throw new KunlunError(KUNLUN_ERR_CODES.ADMIN.USERNAME.MISSING);
             }
 
             // *Throwing the error again, as it wasn't expected:

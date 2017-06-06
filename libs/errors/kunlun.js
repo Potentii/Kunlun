@@ -1,11 +1,16 @@
 /**
  * Represents a business logic failure
  */
-class OperationError extends Error{
+class KunlunError extends Error{
 
    constructor(code, message){
       super(message);
+      this._name = 'KunlunError';
       this._code = code;
+   }
+
+   get name(){
+      return this._name;
    }
 
    get code(){
@@ -16,4 +21,4 @@ class OperationError extends Error{
 
 
 // *Exporting this class:
-module.exports = OperationError;
+module.exports = KunlunError;

@@ -1,11 +1,11 @@
 
 /**
- * Defines the operation error codes
+ * Defines the kunlun error codes
  * @readonly
  * @enum
  * @type {object}
  */
-const OP_ERR_CODES = Object.freeze({
+const KUNLUN_ERR_CODES = Object.freeze({
    ADMIN: {
       CHECK: 'EADMIN.CHECK',
       USERNAME: {
@@ -18,7 +18,10 @@ const OP_ERR_CODES = Object.freeze({
       }
    },
    ACCESS: {
-      CHECK: 'EACCESS.CHECK'
+      CHECK: {
+         TOKEN: 'EACCESS.CHECK.TOKEN',
+         USERNAME: 'EACCESS.CHECK.USERNAME'
+      }
    },
    CHALLENGE: {
       TYPE: 'ECHALLENGE.TYPE',
@@ -55,4 +58,4 @@ const OP_ERR_CODES = Object.freeze({
 
 
 
-module.exports = { OP_ERR_CODES };
+module.exports = { KUNLUN_ERR_CODES };

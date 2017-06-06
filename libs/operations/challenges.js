@@ -3,9 +3,9 @@ const uuid = require('uuid');
 const crypto = require('crypto');
 const xor = require('buffer-xor');
 const cry = require('../tools/cry');
-const OperationError = require('../tools/operation-error');
+const KunlunError = require('../errors/kunlun');
 const { COLLECTIONS } = require('../repository/model/meta');
-const { OP_ERR_CODES } = require('../tools/operation-error-codes');
+const { KUNLUN_ERR_CODES } = require('../errors/codes');
 
 
 
@@ -32,13 +32,14 @@ module.exports = (mongoose, settings) => {
     * @see {@link https://tools.ietf.org/html/rfc5802#section-5|RFC5802 - 5. SCRAM Authentication Exchange}
     */
    function generateNew(username, client_nonce){
-      // *Rejecting into an operation error, if the username is not a string:
+      // TODO check if the credentials belongs to the current application
+      // *Rejecting into an kunlun error, if the username is not a string:
       if(typeof username !== 'string')
-         return Promise.reject(new OperationError(OP_ERR_CODES.CHALLENGE.USERNAME.TYPE, 'The username must be a string'));
+         return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.USERNAME.TYPE, 'The username must be a string'));
 
-      // *Rejecting into an operation error, if the client_nonce is not a string:
+      // *Rejecting into an kunlun error, if the client_nonce is not a string:
       if(typeof client_nonce !== 'string')
-         return Promise.reject(new OperationError(OP_ERR_CODES.CHALLENGE.NONCE.TYPE, 'The username must be a string'));
+         return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.NONCE.TYPE, 'The username must be a string'));
 
       // *Generating a random server nonce:
       const server_nonce = uuid.v4();
@@ -93,8 +94,8 @@ module.exports = (mongoose, settings) => {
                   });
             else
                // *If there isn't:
-               // *Throwing an operation error, as the username doesn't exist:
-               throw new OperationError(OP_ERR_CODES.CHALLENGE.USERNAME.NOTFOUND, 'Invalid username');
+               // *Throwing a kunlun error, as the username doesn't exist:
+               throw new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.USERNAME.NOTFOUND, 'Invalid username');
          });
    }
 
@@ -109,9 +110,9 @@ module.exports = (mongoose, settings) => {
     * @see {@link https://tools.ietf.org/html/rfc5802#section-5|RFC5802 - 5. SCRAM Authentication Exchange}
     */
    function checkAnswer(challenge_id, client_proof){
-      // *Rejecting into an operation error, if the challenge_id is not a string:
+      // *Rejecting into an kunlun error, if the challenge_id is not a string:
       if(typeof challenge_id !== 'string' && !(challenge_id instanceof mongoose.Types.ObjectId))
-         return Promise.reject(new OperationError(OP_ERR_CODES.CHALLENGE.TYPE, 'The challenge id must be a string or a mongoose ObjectId'));
+         return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.TYPE, 'The challenge id must be a string or a mongoose ObjectId'));
 
       // *Getting the client proof as a buffer:
       client_proof = new Buffer(client_proof, 'base64');
@@ -172,13 +173,13 @@ module.exports = (mongoose, settings) => {
                               });
                         } else{
                            // *If it isn't:
-                           // *Throwing an operational error, as the provided proof isn't matching:
-                           throw new OperationError(OP_ERR_CODES.CHALLENGE.PROOF.CHECK, 'Incorrect proof');
+                           // *Throwing a kunlunal error, as the provided proof isn't matching:
+                           throw new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.PROOF.CHECK, 'Incorrect proof');
                         }
                      } else{
                         // *If it doesn't:
-                        // *Throwing an operational error, as the challenge credential doesn't exist:
-                        throw new OperationError(OP_ERR_CODES.CHALLENGE.USERNAME.NOTFOUND, 'Invalid username');
+                        // *Throwing a kunlunal error, as the challenge credential doesn't exist:
+                        throw new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.USERNAME.NOTFOUND, 'Invalid username');
                      }
                   })
                   .then(result => markAsAnswered(challenge_id)
@@ -187,8 +188,8 @@ module.exports = (mongoose, settings) => {
                         .then(() => Promise.reject(err)));
             } else{
                // *If it doesn't:
-               // *Throwing an operation error, as the challenge doesn't exist, or it had been answered before:
-               throw new OperationError(OP_ERR_CODES.CHALLENGE.NOTFOUND, 'Invalid challenge');
+               // *Throwing a kunlun error, as the challenge doesn't exist, or it had been answered before:
+               throw new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.NOTFOUND, 'Invalid challenge');
             }
          })
          .catch(err => {
@@ -198,8 +199,8 @@ module.exports = (mongoose, settings) => {
                // *Checking if the error occurred on the id:
                if(err.path === '_id')
                   // *if it has:
-                  // *Throwing an operation error, as the challenge doesn't exist:
-                  throw new OperationError(OP_ERR_CODES.CHALLENGE.NOTFOUND, 'Invalid challenge');
+                  // *Throwing a kunlun error, as the challenge doesn't exist:
+                  throw new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.NOTFOUND, 'Invalid challenge');
             }
 
             // *Throwing the error again, as it wasn't expected:
@@ -222,7 +223,7 @@ module.exports = (mongoose, settings) => {
                   return challenge_found;
                }
             } else{
-               throw new OperationError(OP_ERR_CODES.CHALLENGE.NOTFOUND, 'Invalid challenge');
+               throw new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.NOTFOUND, 'Invalid challenge');
             }
          });
    }

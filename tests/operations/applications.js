@@ -2,7 +2,7 @@
 const uuid = require('uuid');
 const { expect } = require('chai');
 const auth = require('../tools/auth-service');
-const OperationError = require('../../libs/tools/operation-error');
+const KunlunError = require('../../libs/errors/kunlun');
 
 
 
@@ -36,7 +36,7 @@ describe('Application', function(){
          // *Throwing an error, as this operation should not have been successful:
          .then(() => Promise.reject(new Error()))
          .catch(err => {
-            expect(err).to.be.instanceof(OperationError);
+            expect(err).to.be.instanceof(KunlunError);
             expect(err.code).to.be.equal('EAPPLICATION.NAME.MISSING');
 
          });
@@ -54,7 +54,7 @@ describe('Application', function(){
                   // *Throwing an error, as this operation should not have been successful:
                   .then(() => Promise.reject(new Error()))
                   .catch(err => {
-                     expect(err).to.be.instanceof(OperationError);
+                     expect(err).to.be.instanceof(KunlunError);
                      expect(err.code).to.be.equal('EAPPLICATION.NAME.EXISTS');
                   });
             });

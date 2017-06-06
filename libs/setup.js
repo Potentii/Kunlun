@@ -1,7 +1,7 @@
 const database = require('./repository/database');
 
 
-function deploy(database_options, settings){
+function deploy(database_options, settings = {}){
 
    settings = {
       credentials: {
@@ -30,7 +30,9 @@ function deploy(database_options, settings){
          credentials:  require('./operations/credentials')(mongoose, settings.credentials),
          challenges:   require('./operations/challenges')(mongoose, settings.challenges),
          accesses:     require('./operations/accesses')(mongoose, settings.accesses),
-         settings
+         settings,
+         errors:       require('./errors/codes'),
+         types:        {}
       };
    });
 }

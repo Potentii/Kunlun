@@ -2,7 +2,7 @@
 const uuid = require('uuid');
 const { expect } = require('chai');
 const auth = require('../tools/auth-service');
-const OperationError = require('../../libs/tools/operation-error');
+const KunlunError = require('../../libs/errors/kunlun');
 
 
 
@@ -45,7 +45,7 @@ describe('Credentials', function(){
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
-               expect(err).to.be.instanceof(OperationError);
+               expect(err).to.be.instanceof(KunlunError);
                expect(err.code).to.be.equal('ECREDENTIAL.USERNAME.TYPE');
             });
       });
@@ -65,7 +65,7 @@ describe('Credentials', function(){
                   // *Throwing an error, as this operation should not have been successful:
                   .then(() => Promise.reject(new Error()))
                   .catch(err => {
-                     expect(err).to.be.instanceof(OperationError);
+                     expect(err).to.be.instanceof(KunlunError);
                      expect(err.code).to.be.equal('ECREDENTIAL.USERNAME.EXISTS');
                   });
             });
@@ -87,7 +87,7 @@ describe('Credentials', function(){
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
-               expect(err).to.be.instanceof(OperationError);
+               expect(err).to.be.instanceof(KunlunError);
                expect(err.code).to.be.equal('ECREDENTIAL.USERNAME.LENGTH');
             });
       });
@@ -108,7 +108,7 @@ describe('Credentials', function(){
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
-               expect(err).to.be.instanceof(OperationError);
+               expect(err).to.be.instanceof(KunlunError);
                expect(err.code).to.be.equal('ECREDENTIAL.USERNAME.LENGTH');
             });
       });
@@ -129,7 +129,7 @@ describe('Credentials', function(){
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
-               expect(err).to.be.instanceof(OperationError);
+               expect(err).to.be.instanceof(KunlunError);
                expect(err.code).to.be.equal('ECREDENTIAL.PASSWORD.TYPE');
             });
       });
@@ -150,7 +150,7 @@ describe('Credentials', function(){
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
-               expect(err).to.be.instanceof(OperationError);
+               expect(err).to.be.instanceof(KunlunError);
                expect(err.code).to.be.equal('ECREDENTIAL.PASSWORD.LENGTH');
             });
       });
@@ -171,7 +171,7 @@ describe('Credentials', function(){
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
-               expect(err).to.be.instanceof(OperationError);
+               expect(err).to.be.instanceof(KunlunError);
                expect(err.code).to.be.equal('ECREDENTIAL.PASSWORD.LENGTH');
             });
       });

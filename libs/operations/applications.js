@@ -1,9 +1,9 @@
 // *Requiring the needed modules:
 const uuid = require('uuid');
 const cry = require('../tools/cry');
-const OperationError = require('../tools/operation-error');
+const KunlunError = require('../errors/kunlun');
 const { COLLECTIONS } = require('../repository/model/meta');
-const { OP_ERR_CODES } = require('../tools/operation-error-codes');
+const { KUNLUN_ERR_CODES } = require('../errors/codes');
 
 
 
@@ -51,7 +51,7 @@ module.exports = (mongoose, settings) => {
                // *Checking the error code:
                switch(err.code){
                   // *If the name already exists:
-                  case 11000: throw new OperationError(OP_ERR_CODES.APPLICATION.NAME.EXISTS);
+                  case 11000: throw new KunlunError(KUNLUN_ERR_CODES.APPLICATION.NAME.EXISTS);
                }
             }
 
@@ -60,7 +60,7 @@ module.exports = (mongoose, settings) => {
                // *If it has:
                // *Checking the error kinds for name:
                if(err.errors.name.kind === 'required')
-                  throw new OperationError(OP_ERR_CODES.APPLICATION.NAME.MISSING);
+                  throw new KunlunError(KUNLUN_ERR_CODES.APPLICATION.NAME.MISSING);
             }
 
             // *Throwing the error again, as it wasn't expected:

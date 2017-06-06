@@ -1,8 +1,8 @@
 // *Requiring the needed modules:
 const uuid = require('uuid');
-const OperationError = require('../tools/operation-error');
+const KunlunError = require('../errors/kunlun');
 const { COLLECTIONS } = require('../repository/model/meta');
-const { OP_ERR_CODES } = require('../tools/operation-error-codes');
+const { KUNLUN_ERR_CODES } = require('../errors/codes');
 
 
 
@@ -39,12 +39,12 @@ module.exports = (mongoose, settings) => {
                         // *Returning the access credential:
                         return credential_found;
 
-                     // *Throwing an operation error, as the access check have failed:
-                     throw new OperationError(OP_ERR_CODES.ACCESS.CHECK, 'Invalid access token');
+                     // *Throwing a kunlun error, as the access check have failed:
+                     throw new KunlunError(KUNLUN_ERR_CODES.ACCESS.CHECK.TOKEN, 'Invalid access token');
                   });
 
-            // *Throwing an operation error, as the access check have failed:
-            throw new OperationError(OP_ERR_CODES.ACCESS.CHECK, 'Invalid access username');
+            // *Throwing a kunlun error, as the access check have failed:
+            throw new KunlunError(KUNLUN_ERR_CODES.ACCESS.CHECK.USERNAME, 'Invalid access username');
          });
    }
 
