@@ -34,7 +34,7 @@ describe('Application', function(){
          // *Adding an application without name:
          return auth.get().applications.add(undefined, name)
          // *Throwing an error, as this operation should not have been successful:
-         .then(() => new Error())
+         .then(() => Promise.reject(new Error()))
          .catch(err => {
             expect(err).to.be.instanceof(OperationError);
             expect(err.code).to.be.equal('EAPPLICATION.NAME.MISSING');
@@ -52,7 +52,7 @@ describe('Application', function(){
             .then(result => {
                return auth.get().applications.add(undefined, name)
                   // *Throwing an error, as this operation should not have been successful:
-                  .then(() => new Error())
+                  .then(() => Promise.reject(new Error()))
                   .catch(err => {
                      expect(err).to.be.instanceof(OperationError);
                      expect(err.code).to.be.equal('EAPPLICATION.NAME.EXISTS');

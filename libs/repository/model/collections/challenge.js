@@ -22,6 +22,12 @@ module.exports = Schema => {
          match: [COMMON_REGEX.UUIDV4, 'Invalid server nonce. It must be an UUID-V4 string.']
       },
 
+      answered: {
+         type: Boolean,
+         required: true,
+         default: false
+      },
+
       _credential: {
          type: Schema.Types.ObjectId,
          ref: COLLECTIONS.CREDENTIAL,

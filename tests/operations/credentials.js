@@ -43,7 +43,7 @@ describe('Credentials', function(){
          // *Adding a credential without username:
          return auth.get().credentials.add(application, username, password, client_secret)
             // *Throwing an error, as this operation should not have been successful:
-            .then(() => new Error())
+            .then(() => Promise.reject(new Error()))
             .catch(err => {
                expect(err).to.be.instanceof(OperationError);
                expect(err.code).to.be.equal('ECREDENTIAL.USERNAME.TYPE');
@@ -63,7 +63,7 @@ describe('Credentials', function(){
                // *Assing the same credential:
                return auth.get().credentials.add(application, username, password, client_secret)
                   // *Throwing an error, as this operation should not have been successful:
-                  .then(() => new Error())
+                  .then(() => Promise.reject(new Error()))
                   .catch(err => {
                      expect(err).to.be.instanceof(OperationError);
                      expect(err.code).to.be.equal('ECREDENTIAL.USERNAME.EXISTS');
@@ -85,7 +85,7 @@ describe('Credentials', function(){
          // *Adding a credential with a short username:
          return auth.get().credentials.add(application, username, password, client_secret)
             // *Throwing an error, as this operation should not have been successful:
-            .then(() => new Error())
+            .then(() => Promise.reject(new Error()))
             .catch(err => {
                expect(err).to.be.instanceof(OperationError);
                expect(err.code).to.be.equal('ECREDENTIAL.USERNAME.LENGTH');
@@ -106,7 +106,7 @@ describe('Credentials', function(){
          // *Adding a credential with a long username:
          return auth.get().credentials.add(application, username, password, client_secret)
             // *Throwing an error, as this operation should not have been successful:
-            .then(() => new Error())
+            .then(() => Promise.reject(new Error()))
             .catch(err => {
                expect(err).to.be.instanceof(OperationError);
                expect(err.code).to.be.equal('ECREDENTIAL.USERNAME.LENGTH');
@@ -127,7 +127,7 @@ describe('Credentials', function(){
          // *Adding a credential without password:
          return auth.get().credentials.add(application, username, password, client_secret)
             // *Throwing an error, as this operation should not have been successful:
-            .then(() => new Error())
+            .then(() => Promise.reject(new Error()))
             .catch(err => {
                expect(err).to.be.instanceof(OperationError);
                expect(err.code).to.be.equal('ECREDENTIAL.PASSWORD.TYPE');
@@ -148,7 +148,7 @@ describe('Credentials', function(){
          // *Adding a credential with a short password:
          return auth.get().credentials.add(application, username, password, client_secret)
             // *Throwing an error, as this operation should not have been successful:
-            .then(() => new Error())
+            .then(() => Promise.reject(new Error()))
             .catch(err => {
                expect(err).to.be.instanceof(OperationError);
                expect(err.code).to.be.equal('ECREDENTIAL.PASSWORD.LENGTH');
@@ -169,7 +169,7 @@ describe('Credentials', function(){
          // *Adding a credential with a long password:
          return auth.get().credentials.add(application, username, password, client_secret)
             // *Throwing an error, as this operation should not have been successful:
-            .then(() => new Error())
+            .then(() => Promise.reject(new Error()))
             .catch(err => {
                expect(err).to.be.instanceof(OperationError);
                expect(err.code).to.be.equal('ECREDENTIAL.PASSWORD.LENGTH');

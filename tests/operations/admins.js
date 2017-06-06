@@ -36,7 +36,7 @@ describe('Admin', function(){
          // *Adding an admin without username:
          return auth.get().admins.add(undefined, username, password)
          // *Throwing an error, as this operation should not have been successful:
-         .then(() => new Error())
+         .then(() => Promise.reject(new Error()))
          .catch(err => {
             expect(err).to.be.instanceof(OperationError);
             expect(err.code).to.be.equal('EADMIN.USERNAME.MISSING');
@@ -56,7 +56,7 @@ describe('Admin', function(){
             .then(result => {
                return auth.get().admins.add(undefined, username, password)
                   // *Throwing an error, as this operation should not have been successful:
-                  .then(() => new Error())
+                  .then(() => Promise.reject(new Error()))
                   .catch(err => {
                      expect(err).to.be.instanceof(OperationError);
                      expect(err.code).to.be.equal('EADMIN.USERNAME.EXISTS');
@@ -78,10 +78,10 @@ describe('Admin', function(){
          // *Adding an admin without password:
          return auth.get().admins.add(undefined, username, password)
          // *Throwing an error, as this operation should not have been successful:
-         .then(() => new Error())
+         .then(() => Promise.reject(new Error()))
          .catch(err => {
             expect(err).to.be.instanceof(OperationError);
-            expect(err.code).to.be.equal('EADMIN.PASSWORD.MISSING');
+            expect(err.code).to.be.equal('EADMIN.PASSWORD.TYPE');
          });
       });
 

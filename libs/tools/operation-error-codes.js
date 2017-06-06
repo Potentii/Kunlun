@@ -12,13 +12,27 @@ const OP_ERR_CODES = Object.freeze({
          LENGTH:  'EADMIN.USERNAME.LENGTH',
          MISSING: 'EADMIN.USERNAME.MISSING',
          EXISTS:  'EADMIN.USERNAME.EXISTS'
+      },
+      PASSWORD: {
+         TYPE: 'EADMIN.PASSWORD.TYPE'
       }
    },
    ACCESS: {
       CHECK: 'EACCESS.CHECK'
    },
    CHALLENGE: {
-      CHECK: 'ECHALLENGE.CHECK'
+      TYPE: 'ECHALLENGE.TYPE',
+      NOTFOUND: 'ECHALLENGE.NOTFOUND',
+      USERNAME: {
+         TYPE: 'ECHALLENGE.USERNAME.TYPE',
+         NOTFOUND: 'ECHALLENGE.USERNAME.NOTFOUND'
+      },
+      NONCE: {
+         TYPE: 'ECHALLENGE.NONCE.TYPE',
+      },
+      PROOF: {
+         CHECK: 'ECHALLENGE.PROOF.CHECK'
+      }
    },
    APPLICATION: {
       NAME: {

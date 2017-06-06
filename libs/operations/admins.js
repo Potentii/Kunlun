@@ -58,6 +58,10 @@ module.exports = (mongoose, settings) => {
     * @param {String} password The new admin password
     */
    function add(admin, username, password){
+      // *Rejecting into an operation error, if the password is not a string:
+      if(typeof password !== 'string')
+         return Promise.reject(new OperationError(OP_ERR_CODES.ADMIN.PASSWORD.TYPE, 'The password must be a string'));
+
 
       // TODO create an '_admin' field in Admin collection, so the admin creator can be referenced
       // TODO or just create a separated logging collection for that
