@@ -1,6 +1,7 @@
 // *Requiring the needed modules:
 const uuid = require('uuid');
 const cry = require('../tools/cry');
+const SCRAM = require('../tools/scram');
 const KunlunError = require('../errors/kunlun');
 const { COLLECTIONS } = require('../repository/model/meta');
 const { KUNLUN_ERR_CODES } = require('../errors/codes');
@@ -34,39 +35,25 @@ module.exports = (mongoose, settings) => {
          validateUsername(username, settings.username);
          validatePassword(password, settings.password);
 
-         // *Generating the password hash salt:
-         const salt = uuid.v4();
-
-         // *Setting the iteration count for the key stretching function:
-         const it = 4096;
-
-         // *Hashing the password using the generated salt:
-         const hashed_password = cry.pbkdf2Sync('sha256', 256, new Buffer(password, 'utf8'), new Buffer(salt, 'utf8'), it);
-
-         // *Computing the client key and its hashed version:
-         const client_key = cry.hmacSync('sha256', new Buffer(client_secret, 'utf8'), hashed_password);
-         // *Getting the hashed version of the client key to be stored:
-         const hashed_client_key = cry.hashSync('sha256', client_key);
-
-         // *Generating a random server secret:
-         const server_secret = uuid.v4();
-         // *Computing the server key:
-         const server_key = cry.hmacSync('sha256', new Buffer(server_secret, 'utf8'), hashed_password);
-
-         // *Adding a new credential:
-         return new Credential({
-               username,
-               password: hashed_password.toString('hex'),
-               salt,
-               it,
-               client_key: hashed_client_key.toString('hex'),
-               server_secret,
-               _application: application._id
+         return SCRAM.generateChallengeable(password, client_secret)
+            .then(challengeable => {
+               // *Adding a new credential:
+               return new Credential({
+                     username:      username,
+                     password:      challengeable.hashed_password.toString('hex'),
+                     salt:          challengeable.salt,
+                     it:            challengeable.it,
+                     client_key:    challengeable.hashed_client_key.toString('hex'),
+                     server_secret: challengeable.server_secret,
+                     _application:  application._id
+                  })
+                  .save();
             })
-            .save()
+
             .then(credential_created => {
                return { id: credential_created._id };
             })
+
             .catch(err => {
                // *Checking if the error has been thrown by the database:
                if(err.name === 'MongoError'){
