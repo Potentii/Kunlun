@@ -17,13 +17,13 @@ mongoose.Promise = Promise;
  * @param  {string} settings.pass        The database password
  * @return {Promise}                     It resolves into the mongoose instance, or it rejects if some error happens
  */
-function connectAndSync(settings){
+function connectAndSync(settings, syncable){
    // *Returning the connection and model sync promise chain:
    return connect(settings)
       // *Syncing the database model:
-      .then(() => sync())
-      // *Appending the mongoose in the chain:
-      .then(() => mongoose);
+      .then(conn =>
+         sync(conn, syncable)
+            .then(() => conn));
 }
 
 
@@ -40,14 +40,20 @@ function connectAndSync(settings){
  */
 function connect({ host = '127.0.0.1', database, port = '27017', user, pass }){
    // *Connecting and returning the promise chain:
-   return mongoose.connect(host, database, port, {
-         user,
-         pass,
-         server: {poolSize: 4},
-         promiseLibrary: Promise
-      })
-      // *Appending the mongoose in the chain:
-      .then(() => mongoose);
+   return new Promise((resolve, reject) => {
+      try{
+         const conn = mongoose.createConnection(host, database, port, {
+            user,
+            pass,
+            server: {poolSize: 4},
+            promiseLibrary: Promise
+         });
+
+         resolve(conn);
+      } catch(err){
+         reject(err);
+      }
+   });
 }
 
 
@@ -55,9 +61,12 @@ function connect({ host = '127.0.0.1', database, port = '27017', user, pass }){
 /**
  * Sets up the data model
  */
-function sync(){
+function sync(conn, syncable){
+   if(!syncable || typeof syncable.sync !== 'function')
+      throw new TypeError('\"syncable\" must have a \"sync(conn)\" function');
+
    // *Applying the model:
-   model_adapter.apply(mongoose);
+   syncable.sync(conn);
 }
 
 
@@ -66,9 +75,9 @@ function sync(){
  * Disconnects from the database
  * @return {Promise} Resolves if it goes ok, or rejects if an error has happened
  */
-function disconnect(){
+function disconnect(conn){
    // *Disconnecting:
-   return mongoose.disconnect();
+   return conn.disconnect();
 }
 
 
@@ -77,5 +86,6 @@ function disconnect(){
 module.exports = {
    connectAndSync,
    connect,
+   sync,
    disconnect
 };

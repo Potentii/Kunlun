@@ -2,11 +2,13 @@
 const { COLLECTIONS } = require('../meta');
 // *Getting the common regex:
 const COMMON_REGEX = require('../../../tools/common-regex');
+// *Getting the Schema class:
+const { Schema } = require('mongoose');
 
 
 
 // *Exporting this module as a function:
-module.exports = Schema => {
+module.exports = () => {
 
 
 

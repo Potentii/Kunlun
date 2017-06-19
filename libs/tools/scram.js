@@ -38,6 +38,36 @@ function generateChallengeable(password, client_secret){
 
       // *Setting the iteration count for the key stretching function:
       const it = 4096;
+      /*
+      // *Generating a random server secret:
+      const server_secret = uuid.v4();
+
+      return Promise.all([
+         // *Computing the server key:
+         cry.hmac('sha256', new Buffer(server_secret, 'utf8'), hashed_password),
+         cry.pbkdf2Sync('sha256', 256, new Buffer(password, 'utf8'), new Buffer(salt, 'utf8'), it)
+            .then(hashed_password => {
+               // *Computing the client key and its hashed version:
+               const client_key = cry.hmacSync('sha256', new Buffer(client_secret, 'utf8'), hashed_password);
+               // *Getting the hashed version of the client key to be stored:
+               const hashed_client_key = cry.hashSync('sha256', client_key);
+               return {
+                  hashed_password,
+                  hashed_client_key
+               };
+            })
+      ])
+
+      .then(([server_secret, { hashed_password, hashed_client_key }]) => {
+         return {
+            hashed_password,
+            salt,
+            it,
+            hashed_client_key,
+            server_secret
+         }
+      });
+      */
 
       // *Hashing the password using the generated salt:
       const hashed_password = cry.pbkdf2Sync('sha256', 256, new Buffer(password, 'utf8'), new Buffer(salt, 'utf8'), it);
