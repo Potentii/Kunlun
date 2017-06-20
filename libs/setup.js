@@ -1,80 +1,49 @@
-const database = require('./repository/database');
+// *Requiring the needed modules:
+const connections = require('./repository/connections');
+const Kunlun = require('./kunlun');
 
 
-function deploy(database_options, settings = {}){
 
-   settings = {
-      credentials: {
-         username: {
-            min_length: settings.credentials_username_min_length,
-            max_length: settings.credentials_username_max_length
-         },
-         password: {
-            min_length: settings.credentials_password_min_length,
-            max_length: settings.credentials_password_max_length
-         }
+/**
+ * Sets up and deploy the Kunlun service
+ * @param  {Object} settings The kunlun settings object
+ * @return {Promise<Kunlun>} The deploy promise
+ */
+function deploy(settings){
+   // *Getting the core model initializer:
+   const CoreModelSynchronizer = require('./repository/model/synchronizer/core-model-synchronizer');
+
+   // *Connecting and synchronizing the core database:
+   return connections.registerAndConnectAndSync(
+      connections.NAMES.DB_ADMIN,
+      {
+         database: settings.connections.database,
+         host:     settings.connections.host,
+         port:     settings.connections.port,
+         user:     settings.connections.roles.db_admin.username,
+         pass:     settings.connections.roles.db_admin.password
       },
-      connection: {
-         host: '127.0.0.1',
-         port: '27017',
-         database: 'kunlun_base',
-         roles: {
-            user_admin: {
-               username: 'abc',
-               password: '123'
-            },
-            db_admin: {
-               username: 'abc',
-               password: '123'
-            },
-            read: {
-               username: 'abc',
-               password: '123'
-            },
-            read_write: {
-               username: 'abc',
-               password: '123'
-            }
-         }
-      }
-   };
+      new CoreModelSynchronizer())
 
-   const module = require('module');
-
-   return database.connectAndSync({
-      database: settings.connection.database,
-      host:     settings.connection.host,
-      port:     settings.connection.port,
-      user:     settings.connection.roles.db_admin.username,
-      pass:     settings.connection.roles.db_admin.password
-   }, )
-
-   return database.connectAndSync({
-      host:     database_options.hostname,
-      port:     database_options.port,
-      user:     database_options.username,
-      pass:     database_options.password,
-      database: database_options.database
-   })
-   .then(mongoose => {
-      return {
-         admins:       require('./operations/admins')(mongoose, settings.admins),
-         applications: require('./operations/applications')(mongoose, settings.applications),
-         credentials:  require('./operations/credentials')(mongoose, settings.credentials),
-         challenges:   require('./operations/challenges')(mongoose, settings.challenges),
-         accesses:     require('./operations/accesses')(mongoose, settings.accesses),
-         settings,
-         errors:       require('./errors/codes'),
-         types:        {}
-      };
-   });
+      // TODO connect and synchronize to all applications' sub databases
+      .then(core_conn => {
+         // *Building and returnig the Kunlun service instance:
+         return new Kunlun(settings);
+      });
 }
 
 
 
+/**
+ * Releases all connections to database
+ * @return {Promise} The undeploy promise
+ */
 function undeploy(){
-   return database.disconnect();
+   // *Releasing all the connections:
+   return connections.disconnectAll();
 }
 
 
+
+// *Exporting this module:
 module.exports = { deploy, undeploy };
