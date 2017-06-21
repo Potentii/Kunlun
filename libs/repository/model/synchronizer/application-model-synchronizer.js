@@ -20,9 +20,9 @@ class ApplicationModelSynchronizer extends ModelSynchronizer{
     */
    sync(conn){
       // *Applying the collections:
-      conn.model(COLLECTIONS.CREDENTIAL,  require('../collections/credential')());
-      conn.model(COLLECTIONS.CHALLENGE,   require('../collections/challenge')());
-      conn.model(COLLECTIONS.ACCESS,      require('../collections/access')());
+      conn.model(COLLECTIONS.CREDENTIAL, require('../collections/credential')());
+      conn.model(COLLECTIONS.CHALLENGE,  require('../collections/challenge')());
+      conn.model(COLLECTIONS.ACCESS,     require('../collections/access')());
    }
 }
 

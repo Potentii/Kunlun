@@ -10,11 +10,21 @@ describe('Credentials', function(){
    const SIMPLE_PASSWORD = 'abc';
    // *Generating a default random client secret:
    const client_secret = uuid.v4();
+   let application = null;
 
-   // TODO unmock this application instance:
-   let application = {
-      _id: require('mongoose').Types.ObjectId()
-   };
+
+   before('Creating an application', function(){
+      const application_name = uuid.v4();
+      return auth.get().applications.add(null, application_name)
+         .then(result => {
+            application = {
+               _id: result.id,
+               name: application_name
+            };
+         });
+   });
+
+   // TODO remove the application
 
 
    it('Registers a valid credential', function(){

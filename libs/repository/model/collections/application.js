@@ -29,6 +29,12 @@ module.exports = () => {
          match: [COMMON_REGEX.UUIDV4, 'Invalid salt. It must be an UUID-V4 string.']
       },
 
+      database: {
+         type: String,
+         unique: true,
+         required: true
+      },
+
       date: {
          type: Date,
          required: true,

@@ -97,11 +97,20 @@ function sync(conn, model_synchronizer){
 /**
  * Retrieves the connection given its name
  * @param  {String} connection_name The connection name
- * @return {Connection}             The found connection, or undefined if it doesn't exist
+ * @return {Connection}             The found connection
+ * @throws {Error}                  If the connection doesn't exist
  * @see    {@link NAMES}            For the list of default connection names
  */
 function get(connection_name){
-   return connections.get(connection_name);
+   // *Searching for the connection:
+   const conn = connections.get(connection_name);
+
+   // *Throwing an error if the connection could'nt be found:
+   if(!conn)
+      throw new Error('The \"' + connection_name + '\" connection hasn\'t been registered yet');
+
+   // *Returning it:
+   return conn;
 }
 
 

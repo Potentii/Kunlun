@@ -66,12 +66,6 @@ module.exports = () => {
          match: [COMMON_REGEX.UUIDV4, 'Invalid server secret. It must be an UUID-V4 string.']
       },
 
-      _application: {
-         type: Schema.Types.ObjectId,
-         ref: COLLECTIONS.APPLICATION,
-         required: true
-      },
-
       date: {
          type: Date,
          required: true,

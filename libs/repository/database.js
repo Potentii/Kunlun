@@ -1,6 +1,5 @@
 // *Requiring the needed modules:
 const mongoose = require('mongoose');
-const model_adapter = require('./model/adapter');
 
 // *Setting up the internal mongoose promise engine:
 mongoose.Promise = Promise;

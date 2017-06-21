@@ -2,20 +2,22 @@
 const uuid = require('uuid');
 const cry = require('../tools/cry');
 const KunlunError = require('../errors/kunlun');
+const conns = require('../repository/connections');
 const { COLLECTIONS } = require('../repository/model/meta');
 const { KUNLUN_ERR_CODES } = require('../errors/codes');
+const ApplicationModelSynchronizer = require('../repository/model/synchronizer/application-model-synchronizer');
 
 
 
 /**
  * Builds the applications operations
- * @param  {Mongoose} mongoose The mongoose instance
- * @param  {Object} settings   The settings to configure the applications operations
- * @return {Object}            The available operations object
+ * @param  {Kunlun} kunlun   The Kunlun module instance
+ * @param  {Object} settings The settings to configure the applications operations
+ * @return {Object}          The available operations object
  */
-module.exports = (mongoose, settings) => {
+module.exports = (kunlun, settings) => {
    // *Getting the collections models:
-   const Application = mongoose.model(COLLECTIONS.APPLICATION);
+   const Application = conns.get(conns.NAMES.READ_WRITE).model(COLLECTIONS.APPLICATION);
 
 
 
@@ -29,6 +31,12 @@ module.exports = (mongoose, settings) => {
       // TODO create an '_admin' field in Application collection, so the admin creator can be referenced
       // TODO or just create a separated logging collection for that
 
+      const application_database = kunlun.settings.connections.database + '_' + name;
+
+      // *Throwing an error, if the database name gets larger than the maximum supported by mongo, which is 64 characters:
+      if(application_database.length >= 64)
+         throw new Error('The application name must have ' + (63 - (kunlun.settings.connections.database.length + 2)) + ' characters or fewer');
+
       // *Generating the token:
       const token = uuid.v4();
 
@@ -38,11 +46,24 @@ module.exports = (mongoose, settings) => {
       // *Hashing the token using the generated salt:
       const hashed_token = cry.hashSync('sha256', salt + token).toString('hex');
 
+      let id = null;
+
       // *Adding a new client application:
-      return new Application({ name, token: hashed_token, salt })
+      return new Application({ name, token: hashed_token, salt, database: application_database })
          .save()
          .then(application_created => {
-            return { id: application_created._id, token };
+            id = application_created._id;
+
+            return conns.registerAndConnectAndSync(name + '_app_conn', {
+               database: application_database,
+               host:     kunlun.settings.connections.host,
+               port:     kunlun.settings.connections.port,
+               user:     kunlun.settings.connections.roles.read_write.username,
+               pass:     kunlun.settings.connections.roles.read_write.password
+            }, new ApplicationModelSynchronizer());
+         })
+         .then(() => {
+            return { id, token };
          })
          .catch(err => {
             // *Checking if the error has been thrown by the database:
@@ -59,7 +80,7 @@ module.exports = (mongoose, settings) => {
             if(err.name === 'ValidationError'){
                // *If it has:
                // *Checking the error kinds for name:
-               if(err.errors.name.kind === 'required')
+               if(err.errors.name && err.errors.name.kind === 'required')
                   throw new KunlunError(KUNLUN_ERR_CODES.APPLICATION.NAME.MISSING);
             }
 

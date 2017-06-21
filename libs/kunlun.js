@@ -5,14 +5,14 @@
 class Kunlun {
    constructor(settings){
       this._settings = Object.freeze(settings);
-      /*
+
       this._operations = Object.freeze({
-         admins:       require('./operations/admins')(this._settings.admins),
-         applications: require('./operations/applications')(this._settings.applications),
-         credentials:  require('./operations/credentials')(this._settings.credentials),
-         challenges:   require('./operations/challenges')(this._settings.challenges),
-         accesses:     require('./operations/accesses')(this._settings.accesses)
-      });*/
+         admins:       require('./operations/admins')(this, this._settings.admins),
+         applications: require('./operations/applications')(this, this._settings.applications),
+         credentials:  require('./operations/credentials')(this, this._settings.credentials),
+         challenges:   require('./operations/challenges')(this, this._settings.challenges)/*,
+         accesses:     require('./operations/accesses')(this, this._settings.accesses)*/
+      });
 
       const { KUNLUN_ERR_CODES } = require('./errors/codes');
 

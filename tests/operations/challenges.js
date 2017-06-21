@@ -13,11 +13,21 @@ describe('Challenges', function(){
    let username;
    let password;
    let client_secret;
+   let application = null;
 
-   // TODO unmock this application instance:
-   let application = {
-      _id: require('mongoose').Types.ObjectId()
-   };
+
+   before('Creating an application', function(){
+      const application_name = uuid.v4();
+      return auth.get().applications.add(null, application_name)
+         .then(result => {
+            application = {
+               _id: result.id,
+               name: application_name
+            };
+         });
+   });
+
+   // TODO remove the application
 
 
    before(function(){
@@ -40,7 +50,7 @@ describe('Challenges', function(){
       const scram_client = new SCRAMClient(username, password, client_nonce, client_secret);
 
       // *Starting a new challenge:
-      return auth.get().challenges.generateNew(username, client_nonce)
+      return auth.get().challenges.generateNew(application, username, client_nonce)
          .then(result => {
             // *Expecting the result to have the challenge id:
             expect(result).to.have.property('id');
@@ -58,7 +68,7 @@ describe('Challenges', function(){
          // *Processing the server-first-message, and generating the challenge answer:
          .then(result => scram_client.handleServerFirstmessage(result.id, result.combined_nonce, result.salt, result.it, result.server_secret))
          // *Sending the challenge answer:
-         .then(result => auth.get().challenges.checkAnswer(result.id, result.client_proof))
+         .then(result => auth.get().challenges.checkAnswer(application, result.id, result.client_proof))
          .then(result => {
             // *Expecting the result to have the generated access token:
             expect(result).to.have.property('token');
@@ -83,7 +93,7 @@ describe('Challenges', function(){
          const scram_client = new SCRAMClient(inexistent_username, password, client_nonce, client_secret);
 
          // *Starting a new challenge with an inexistent username:
-         return auth.get().challenges.generateNew(inexistent_username, client_nonce)
+         return auth.get().challenges.generateNew(application, inexistent_username, client_nonce)
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -102,7 +112,7 @@ describe('Challenges', function(){
          const scram_client = new SCRAMClient(invalid_username, password, client_nonce, client_secret);
 
          // *Starting a new challenge with an invalid username:
-         return auth.get().challenges.generateNew(invalid_username, client_nonce)
+         return auth.get().challenges.generateNew(application, invalid_username, client_nonce)
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -119,7 +129,7 @@ describe('Challenges', function(){
          const scram_client = new SCRAMClient(username, password, invalid_client_nonce, client_secret);
 
          // *Starting a new challenge with an invalid client nonce:
-         return auth.get().challenges.generateNew(username, invalid_client_nonce)
+         return auth.get().challenges.generateNew(application, username, invalid_client_nonce)
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -142,11 +152,11 @@ describe('Challenges', function(){
          const scram_client = new SCRAMClient(username, password, client_nonce, client_secret);
 
          // *Starting a new challenge:
-         return auth.get().challenges.generateNew(username, client_nonce)
+         return auth.get().challenges.generateNew(application, username, client_nonce)
             // *Processing the server-first-message, and generating the challenge answer:
             .then(result => scram_client.handleServerFirstmessage(result.id, result.combined_nonce, result.salt, result.it, result.server_secret))
             // *Sending the challenge answer, with an inexistent challenge id:
-            .then(result => auth.get().challenges.checkAnswer(inexistent_challenge_id, result.client_proof))
+            .then(result => auth.get().challenges.checkAnswer(application, inexistent_challenge_id, result.client_proof))
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -165,11 +175,11 @@ describe('Challenges', function(){
          const scram_client = new SCRAMClient(username, password, client_nonce, client_secret);
 
          // *Starting a new challenge:
-         return auth.get().challenges.generateNew(username, client_nonce)
+         return auth.get().challenges.generateNew(application, username, client_nonce)
             // *Processing the server-first-message, and generating the challenge answer:
             .then(result => scram_client.handleServerFirstmessage(result.id, result.combined_nonce, result.salt, result.it, result.server_secret))
             // *Sending the challenge answer, with an invalid challenge id:
-            .then(result => auth.get().challenges.checkAnswer(invalid_challenge_id, result.client_proof))
+            .then(result => auth.get().challenges.checkAnswer(application, invalid_challenge_id, result.client_proof))
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -188,11 +198,11 @@ describe('Challenges', function(){
          const scram_client = new SCRAMClient(username, password, client_nonce, client_secret);
 
          // *Starting a new challenge:
-         return auth.get().challenges.generateNew(username, client_nonce)
+         return auth.get().challenges.generateNew(application, username, client_nonce)
             // *Processing the server-first-message, and generating the challenge answer:
             .then(result => scram_client.handleServerFirstmessage(result.id, result.combined_nonce, result.salt, result.it, result.server_secret))
             // *Sending the challenge answer, with an incorrect proof:
-            .then(result => auth.get().challenges.checkAnswer(result.id, incorrect_proof))
+            .then(result => auth.get().challenges.checkAnswer(application, result.id, incorrect_proof))
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -212,7 +222,7 @@ describe('Challenges', function(){
          let correct_client_proof;
 
          // *Starting a new challenge:
-         return auth.get().challenges.generateNew(username, client_nonce)
+         return auth.get().challenges.generateNew(application, username, client_nonce)
             // *Processing the server-first-message, and generating the challenge answer:
             .then(result => scram_client.handleServerFirstmessage(result.id, result.combined_nonce, result.salt, result.it, result.server_secret))
             .then(result => {
@@ -221,10 +231,10 @@ describe('Challenges', function(){
                // *Storing the correct client proof:
                correct_client_proof = result.client_proof;
                // *Sending the challenge answer:
-               return auth.get().challenges.checkAnswer(challenge_id, correct_client_proof);
+               return auth.get().challenges.checkAnswer(application, challenge_id, correct_client_proof);
             })
             // *Sending the challenge answer again:
-            .then(() => auth.get().challenges.checkAnswer(challenge_id, correct_client_proof))
+            .then(() => auth.get().challenges.checkAnswer(application, challenge_id, correct_client_proof))
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -244,7 +254,7 @@ describe('Challenges', function(){
          let correct_client_proof;
 
          // *Starting a new challenge:
-         return auth.get().challenges.generateNew(username, client_nonce)
+         return auth.get().challenges.generateNew(application, username, client_nonce)
             // *Processing the server-first-message, and generating the challenge answer:
             .then(result => scram_client.handleServerFirstmessage(result.id, result.combined_nonce, result.salt, result.it, result.server_secret))
             .then(result => {
@@ -253,10 +263,10 @@ describe('Challenges', function(){
                // *Storing the correct client proof:
                correct_client_proof = result.client_proof;
                // *Sending the challenge answer, with an incorrect proff, so it gets rejected:
-               return auth.get().challenges.checkAnswer(challenge_id, 'A' + correct_client_proof);
+               return auth.get().challenges.checkAnswer(application, challenge_id, 'A' + correct_client_proof);
             })
             // *Sending the challenge answer again, this time with the correct answer:
-            .catch(err => auth.get().challenges.checkAnswer(challenge_id, correct_client_proof))
+            .catch(err => auth.get().challenges.checkAnswer(application, challenge_id, correct_client_proof))
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {

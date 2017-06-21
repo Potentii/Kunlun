@@ -3,6 +3,7 @@ const uuid = require('uuid');
 const cry = require('../tools/cry');
 const SCRAM = require('../tools/scram');
 const KunlunError = require('../errors/kunlun');
+const conns = require('../repository/connections');
 const { COLLECTIONS } = require('../repository/model/meta');
 const { KUNLUN_ERR_CODES } = require('../errors/codes');
 
@@ -10,13 +11,11 @@ const { KUNLUN_ERR_CODES } = require('../errors/codes');
 
 /**
  * Builds the credentials operations
- * @param  {Mongoose} mongoose The mongoose instance
- * @param  {Object} settings   The settings to configure the credentials operations
- * @return {Object}            The available operations object
+ * @param  {Kunlun} kunlun   The Kunlun module instance
+ * @param  {Object} settings The settings to configure the credentials operations
+ * @return {Object}          The available operations object
  */
-module.exports = (mongoose, settings) => {
-   // *Getting the collections models:
-   const Credential = mongoose.model(COLLECTIONS.CREDENTIAL);
+module.exports = (kunlun, settings) => {
 
 
 
@@ -37,6 +36,9 @@ module.exports = (mongoose, settings) => {
 
          return SCRAM.generateChallengeable(password, client_secret)
             .then(challengeable => {
+               // *Getting the collections models:
+               const Credential = conns.get(application.name + '_app_conn').model(COLLECTIONS.CREDENTIAL);
+
                // *Adding a new credential:
                return new Credential({
                      username:      username,
@@ -44,8 +46,7 @@ module.exports = (mongoose, settings) => {
                      salt:          challengeable.salt,
                      it:            challengeable.it,
                      client_key:    challengeable.hashed_client_key.toString('hex'),
-                     server_secret: challengeable.server_secret,
-                     _application:  application._id
+                     server_secret: challengeable.server_secret
                   })
                   .save();
             })

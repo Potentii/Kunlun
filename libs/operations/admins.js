@@ -2,6 +2,7 @@
 const uuid = require('uuid');
 const cry = require('../tools/cry');
 const KunlunError = require('../errors/kunlun');
+const conns = require('../repository/connections');
 const { COLLECTIONS } = require('../repository/model/meta');
 const { KUNLUN_ERR_CODES } = require('../errors/codes');
 
@@ -9,13 +10,13 @@ const { KUNLUN_ERR_CODES } = require('../errors/codes');
 
 /**
  * Builds the admins operations
- * @param  {Mongoose} mongoose The mongoose instance
- * @param  {Object} settings   The settings to configure the admins operations
- * @return {Object}            The available operations object
+ * @param  {Kunlun} kunlun   The Kunlun module instance
+ * @param  {Object} settings The settings to configure the admins operations
+ * @return {Object}          The available operations object
  */
-module.exports = (mongoose, settings) => {
+module.exports = (kunlun, settings) => {
    // *Getting the collections models:
-   const Admin = mongoose.model(COLLECTIONS.ADMIN);
+   const Admin = conns.get(conns.NAMES.READ_WRITE).model(COLLECTIONS.ADMIN);
 
 
 

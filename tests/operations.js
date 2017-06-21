@@ -10,10 +10,14 @@ describe('operations', function(){
       return require('..')
          .deploy({
             credentials: {
-               credentials_username_min_length: 4,
-               credentials_username_max_length: 36,
-               credentials_password_min_length: 2,
-               credentials_password_max_length: 16
+               username: {
+                  min_length: 4,
+                  max_length: 36
+               },
+               password: {
+                  min_length: 2,
+                  max_length: 16
+               }
             },
             connections: {
                host: '127.0.0.1',
@@ -53,8 +57,8 @@ describe('operations', function(){
 
 
    // *Running all the operations test suits:
-   // require('./operations/admins');
-   // require('./operations/applications');
-   // require('./operations/credentials');
-   // require('./operations/challenges');
+   require('./operations/admins');
+   require('./operations/applications');
+   require('./operations/credentials');
+   require('./operations/challenges');
 });

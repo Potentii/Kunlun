@@ -1,5 +1,5 @@
 // *Requiring the needed modules:
-const connections = require('./repository/connections');
+const conns = require('./repository/connections');
 const Kunlun = require('./kunlun');
 
 
@@ -13,20 +13,32 @@ function deploy(settings){
    // *Getting the core model initializer:
    const CoreModelSynchronizer = require('./repository/model/synchronizer/core-model-synchronizer');
 
-   // *Connecting and synchronizing the core database:
-   return connections.registerAndConnectAndSync(
-      connections.NAMES.DB_ADMIN,
-      {
-         database: settings.connections.database,
-         host:     settings.connections.host,
-         port:     settings.connections.port,
-         user:     settings.connections.roles.db_admin.username,
-         pass:     settings.connections.roles.db_admin.password
-      },
-      new CoreModelSynchronizer())
+   // *Connecting and synchronizing the core database connections:
+   return Promise.all([
+         conns.registerAndConnect(
+            conns.NAMES.USER_ADMIN,
+            {
+               database: 'admin',
+               host:     settings.connections.host,
+               port:     settings.connections.port,
+               user:     settings.connections.roles.user_admin.username,
+               pass:     settings.connections.roles.user_admin.password
+            }),
+
+         conns.registerAndConnectAndSync(
+            conns.NAMES.READ_WRITE,
+            {
+               database: settings.connections.database,
+               host:     settings.connections.host,
+               port:     settings.connections.port,
+               user:     settings.connections.roles.read_write.username,
+               pass:     settings.connections.roles.read_write.password
+            },
+            new CoreModelSynchronizer())
+      ])
 
       // TODO connect and synchronize to all applications' sub databases
-      .then(core_conn => {
+      .then(() => {
          // *Building and returnig the Kunlun service instance:
          return new Kunlun(settings);
       });
@@ -40,7 +52,7 @@ function deploy(settings){
  */
 function undeploy(){
    // *Releasing all the connections:
-   return connections.disconnectAll();
+   return conns.disconnectAll();
 }
 
 
