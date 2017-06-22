@@ -27,7 +27,10 @@ describe('Challenges', function(){
          });
    });
 
-   // TODO remove the application
+
+   after('Removing the application', function(){
+      return auth.get().applications.remove(undefined, application.name);
+   });
 
 
    before(function(){

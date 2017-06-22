@@ -31,10 +31,11 @@ module.exports = (kunlun, settings) => {
       // TODO create an '_admin' field in Application collection, so the admin creator can be referenced
       // TODO or just create a separated logging collection for that
 
-      const application_database = kunlun.settings.connections.database + '_' + name;
+      // *Generating the application database name:
+      const database_name = kunlun.settings.connections.database + '_' + name;
 
       // *Throwing an error, if the database name gets larger than the maximum supported by mongo, which is 64 characters:
-      if(application_database.length >= 64)
+      if(database_name.length >= 64)
          throw new Error('The application name must have ' + (63 - (kunlun.settings.connections.database.length + 2)) + ' characters or fewer');
 
       // *Generating the token:
@@ -49,13 +50,15 @@ module.exports = (kunlun, settings) => {
       let id = null;
 
       // *Adding a new client application:
-      return new Application({ name, token: hashed_token, salt, database: application_database })
+      return new Application({ name, token: hashed_token, salt, database: database_name })
          .save()
          .then(application_created => {
+            // *Storing the created application id:
             id = application_created._id;
 
-            return conns.registerAndConnectAndSync(name + '_app_conn', {
-               database: application_database,
+            // *Connecting to, and synchronizing the application database using the read-write mongo user:
+            return conns.registerAndConnectAndSync(conns.NAMES.fromApplication(name), {
+               database: database_name,
                host:     kunlun.settings.connections.host,
                port:     kunlun.settings.connections.port,
                user:     kunlun.settings.connections.roles.read_write.username,
@@ -63,6 +66,7 @@ module.exports = (kunlun, settings) => {
             }, new ApplicationModelSynchronizer());
          })
          .then(() => {
+            // *Returning the data:
             return { id, token };
          })
          .catch(err => {
@@ -91,6 +95,51 @@ module.exports = (kunlun, settings) => {
 
 
 
+   /**
+    * Removes an application by its name
+    *  It will erase all the application related info, but its administrative logs
+    * @param  {Admin} admin             The admin who is trying to do this operation
+    * @param  {String} application_name The name of the application to be removed
+    * @return {Promise}                 It resolves if everything went fine, or rejects on any error
+    */
+   function remove(admin, application_name){
+      let application = null;
+
+      // *Searching for applications that has the given name:
+      return Application
+         .findOne({ name: application_name })
+         .exec()
+         .then(application_found => {
+            application = application_found;
+            if(application){
+               const database = require('../repository/database');
+
+               return database.connect({
+                  database: application.database,
+                  host:     kunlun.settings.connections.host,
+                  port:     kunlun.settings.connections.port,
+                  user:     kunlun.settings.connections.roles.db_admin.username,
+                  pass:     kunlun.settings.connections.roles.db_admin.password
+               })
+               .then(conn => {
+                  return conn.dropDatabase()
+                     .then(() => database.disconnect(conn));
+               });
+            } else{
+               throw new Error() // TODO
+            }
+         })
+         .then(() => {
+            return Application
+               .remove({ _id: application._id })
+               .exec()
+         });
+
+         // TODO log this operation
+   }
+
+
+
    // *Returning the routes:
-   return { add };
+   return { add, remove };
 };

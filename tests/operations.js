@@ -6,6 +6,9 @@ const auth = require('./tools/auth-service');
 describe('operations', function(){
 
    before('Starting services', function(){
+      // *Increasing the timeout for this task:
+      this.timeout(10000);
+
       // *Deploying the Kunlun service:
       return require('..')
          .deploy({

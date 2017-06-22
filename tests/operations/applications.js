@@ -8,6 +8,17 @@ const KunlunError = require('../../libs/errors/kunlun');
 
 describe('Application', function(){
 
+   const applications_to_be_removed = [];
+
+
+   after('Removing created applications', function(){
+      const tasks = [];
+      for(application_name of applications_to_be_removed){
+         tasks.push(auth.get().applications.remove(undefined, application_name));
+      }
+      return Promise.all(tasks);
+   });
+
 
    it('Registers a valid application', function(){
       // *Generating a random name:
@@ -16,6 +27,8 @@ describe('Application', function(){
       // *Adding a valid application:
       return auth.get().applications.add(undefined, name)
          .then(result => {
+            // *Adding to the list of applications to be removed:
+            applications_to_be_removed.push(name);
             // *Expecting the result to have an id:
             expect(result).to.have.property('id');
             // *Expecting the result to have the generated token:
@@ -38,7 +51,6 @@ describe('Application', function(){
          .catch(err => {
             expect(err).to.be.instanceof(KunlunError);
             expect(err.code).to.be.equal('EAPPLICATION.NAME.MISSING');
-
          });
       });
 
@@ -50,6 +62,9 @@ describe('Application', function(){
          // *Adding a valid application:
          return auth.get().applications.add(undefined, name)
             .then(result => {
+               // *Adding to the list of applications to be removed:
+               applications_to_be_removed.push(name);
+               // *Trying to add the application again:
                return auth.get().applications.add(undefined, name)
                   // *Throwing an error, as this operation should not have been successful:
                   .then(() => Promise.reject(new Error()))
@@ -60,6 +75,17 @@ describe('Application', function(){
             });
       });
 
+   });
+
+
+   it('Removes an application by its name', function(){
+      // *Generating a random name:
+      const name = uuid.v4();
+
+      // *Adding a valid application:
+      return auth.get().applications.add(undefined, name)
+         .then(result => auth.get().applications.remove(undefined, name));
+         // TODO check if the database is being removed as well
    });
 
 });

@@ -4,7 +4,7 @@ const db = require('./database');
 
 
 /**
- * The default connections names
+ * The connections names
  * @enum
  * @readonly
  * @type {Object}
@@ -13,7 +13,10 @@ const NAMES = Object.freeze({
    READ:       'read',
    DB_ADMIN:   'db-admin',
    READ_WRITE: 'read-write',
-   USER_ADMIN: 'user-admin'
+   USER_ADMIN: 'user-admin',
+   fromApplication(application_name){
+      return application_name + '-app-connection';
+   }
 });
 
 

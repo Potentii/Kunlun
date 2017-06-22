@@ -24,7 +24,10 @@ describe('Credentials', function(){
          });
    });
 
-   // TODO remove the application
+
+   after('Removing the application', function(){
+      return auth.get().applications.remove(undefined, application.name);
+   });
 
 
    it('Registers a valid credential', function(){

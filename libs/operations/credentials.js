@@ -37,7 +37,7 @@ module.exports = (kunlun, settings) => {
          return SCRAM.generateChallengeable(password, client_secret)
             .then(challengeable => {
                // *Getting the collections models:
-               const Credential = conns.get(application.name + '_app_conn').model(COLLECTIONS.CREDENTIAL);
+               const Credential = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CREDENTIAL);
 
                // *Adding a new credential:
                return new Credential({

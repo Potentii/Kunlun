@@ -11,6 +11,9 @@ describe('Admin', function(){
 
 
    it('Registers a valid admin', function(){
+      // *Increasing the timeout for this task:
+      this.timeout(5000);
+      
       // *Generating a random username:
       const username = uuid.v4();
       // *Setting a default password:

@@ -1,9 +1,6 @@
 // *Requiring the needed modules:
 const uuid = require('uuid');
-const crypto = require('crypto');
-const xor = require('buffer-xor');
 const mongoose = require('mongoose');
-const cry = require('../tools/cry');
 const KunlunError = require('../errors/kunlun');
 const conns = require('../repository/connections');
 const { COLLECTIONS } = require('../repository/model/meta');
@@ -19,22 +16,19 @@ const SCRAM = require('../tools/scram');
  * @return {Object}          The available operations object
  */
 module.exports = (kunlun, settings) => {
-   // *Getting the collections models:
-   // const Challenge  = conns.get(conns.NAMES.READ_WRITE).model(COLLECTIONS.CHALLENGE);
-   // const Credential = conns.get(conns.NAMES.READ_WRITE).model(COLLECTIONS.CREDENTIAL);
-   // const Access     = conns.get(conns.NAMES.READ_WRITE).model(COLLECTIONS.ACCESS);
+
 
 
    /**
     * Starts a new SCRAM flow
     *  It's an implementation of the SCRAM's 'server-first-message'
-    * @param  {String} username     The username that this new challenge'll be related to
-    * @param  {String} client_nonce The client random nonce
-    * @return {Promise}             It resolves into the server fist message response, or rejects into an error
+    * @param  {Application} application  The target application to look for the credentials
+    * @param  {String} username          The username that this new challenge'll be related to
+    * @param  {String} client_nonce      The client random nonce
+    * @return {Promise}                  It resolves into the server fist message response, or rejects into an error
     * @see {@link https://tools.ietf.org/html/rfc5802#section-5|RFC5802 - 5. SCRAM Authentication Exchange}
     */
    function generateNew(application, username, client_nonce){
-      // TODO check if the credentials belongs to the current application
       // *Rejecting into an kunlun error, if the username is not a string:
       if(typeof username !== 'string')
          return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.USERNAME.TYPE, 'The username must be a string'));
@@ -47,8 +41,8 @@ module.exports = (kunlun, settings) => {
       let credential = null;
 
       // *Getting the collections models:
-      const Challenge  = conns.get(application.name + '_app_conn').model(COLLECTIONS.CHALLENGE);
-      const Credential = conns.get(application.name + '_app_conn').model(COLLECTIONS.CREDENTIAL);
+      const Challenge  = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CHALLENGE);
+      const Credential = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CREDENTIAL);
 
       // *Searching for a credential with the given username:
       return Credential
@@ -117,6 +111,7 @@ module.exports = (kunlun, settings) => {
    /**
     * Checks if the challenge answer is correct
     *  It's an implementation of the SCRAM's 'server-final-message'
+    * @param  {Application} application      The target application to look for the credentials
     * @param  {String|ObjectId} challenge_id The challenge this answer's related to
     * @param  {String} client_proof          The calculated client proof (base64 encoded)
     * @return {Promise}                      It resolves into the server final message response, or rejects into an error
@@ -127,13 +122,14 @@ module.exports = (kunlun, settings) => {
       if(typeof challenge_id !== 'string' && !(challenge_id instanceof mongoose.Types.ObjectId))
          return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.TYPE, 'The challenge id must be a string or a mongoose ObjectId'));
 
+      // *Declaring some local cache:
       let challenge = null;
       let credential = null;
 
       // *Getting the collections models:
-      const Challenge  = conns.get(application.name + '_app_conn').model(COLLECTIONS.CHALLENGE);
-      const Credential = conns.get(application.name + '_app_conn').model(COLLECTIONS.CREDENTIAL);
-      const Access     = conns.get(application.name + '_app_conn').model(COLLECTIONS.ACCESS);
+      const Challenge  = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CHALLENGE);
+      const Credential = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CREDENTIAL);
+      const Access     = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.ACCESS);
 
       // *Fetching the provided challenge, only if it hasn't been answered yet:
       return Challenge
@@ -242,7 +238,7 @@ module.exports = (kunlun, settings) => {
 
    function markAsAnswered(application, challenge_id){
       // *Getting the collections models:
-      const Challenge = conns.get(application.name + '_app_conn').model(COLLECTIONS.CHALLENGE);
+      const Challenge = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CHALLENGE);
 
       return Challenge
          .findOne({ _id: challenge_id })
