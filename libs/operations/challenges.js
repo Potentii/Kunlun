@@ -1,9 +1,8 @@
 // *Requiring the needed modules:
 const uuid = require('uuid');
-const crypto = require('crypto');
-const xor = require('buffer-xor');
-const cry = require('../tools/cry');
+const mongoose = require('mongoose');
 const KunlunError = require('../errors/kunlun');
+const conns = require('../repository/connections');
 const { COLLECTIONS } = require('../repository/model/meta');
 const { KUNLUN_ERR_CODES } = require('../errors/codes');
 const SCRAM = require('../tools/scram');
@@ -12,28 +11,24 @@ const SCRAM = require('../tools/scram');
 
 /**
  * Builds the challenges operations
- * @param  {Mongoose} mongoose The mongoose instance
- * @param  {Object} settings   The settings to configure the challenges operations
- * @return {Object}            The available operations object
+ * @param  {Kunlun} kunlun   The Kunlun module instance
+ * @param  {Object} settings The settings to configure the challenges operations
+ * @return {Object}          The available operations object
  */
-module.exports = (mongoose, settings) => {
-   // *Getting the collections models:
-   const Challenge = mongoose.model(COLLECTIONS.CHALLENGE);
-   const Credential = mongoose.model(COLLECTIONS.CREDENTIAL);
-   const Access = mongoose.model(COLLECTIONS.ACCESS);
+module.exports = (kunlun, settings) => {
 
 
 
    /**
     * Starts a new SCRAM flow
     *  It's an implementation of the SCRAM's 'server-first-message'
-    * @param  {String} username     The username that this new challenge'll be related to
-    * @param  {String} client_nonce The client random nonce
-    * @return {Promise}             It resolves into the server fist message response, or rejects into an error
+    * @param  {Application} application  The target application to look for the credentials
+    * @param  {String} username          The username that this new challenge'll be related to
+    * @param  {String} client_nonce      The client random nonce
+    * @return {Promise}                  It resolves into the server fist message response, or rejects into an error
     * @see {@link https://tools.ietf.org/html/rfc5802#section-5|RFC5802 - 5. SCRAM Authentication Exchange}
     */
-   function generateNew(username, client_nonce){
-      // TODO check if the credentials belongs to the current application
+   function generateNew(application, username, client_nonce){
       // *Rejecting into an kunlun error, if the username is not a string:
       if(typeof username !== 'string')
          return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.USERNAME.TYPE, 'The username must be a string'));
@@ -44,6 +39,10 @@ module.exports = (mongoose, settings) => {
 
       // *Declaring the credential variable:
       let credential = null;
+
+      // *Getting the collections models:
+      const Challenge  = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CHALLENGE);
+      const Credential = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CREDENTIAL);
 
       // *Searching for a credential with the given username:
       return Credential
@@ -112,18 +111,25 @@ module.exports = (mongoose, settings) => {
    /**
     * Checks if the challenge answer is correct
     *  It's an implementation of the SCRAM's 'server-final-message'
+    * @param  {Application} application      The target application to look for the credentials
     * @param  {String|ObjectId} challenge_id The challenge this answer's related to
     * @param  {String} client_proof          The calculated client proof (base64 encoded)
     * @return {Promise}                      It resolves into the server final message response, or rejects into an error
     * @see {@link https://tools.ietf.org/html/rfc5802#section-5|RFC5802 - 5. SCRAM Authentication Exchange}
     */
-   function checkAnswer(challenge_id, client_proof){
+   function checkAnswer(application, challenge_id, client_proof){
       // *Rejecting into an kunlun error, if the challenge_id is not a string:
       if(typeof challenge_id !== 'string' && !(challenge_id instanceof mongoose.Types.ObjectId))
          return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.TYPE, 'The challenge id must be a string or a mongoose ObjectId'));
 
+      // *Declaring some local cache:
       let challenge = null;
       let credential = null;
+
+      // *Getting the collections models:
+      const Challenge  = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CHALLENGE);
+      const Credential = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CREDENTIAL);
+      const Access     = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.ACCESS);
 
       // *Fetching the provided challenge, only if it hasn't been answered yet:
       return Challenge
@@ -207,9 +213,9 @@ module.exports = (mongoose, settings) => {
          })
 
          // *Marking the challenge as answered:
-         .then(result => markAsAnswered(challenge_id)
+         .then(result => markAsAnswered(application, challenge_id)
                .then(() => result),
-            err => markAsAnswered(challenge_id)
+            err => markAsAnswered(application, challenge_id)
                .then(() => Promise.reject(err)))
 
          .catch(err => {
@@ -230,7 +236,10 @@ module.exports = (mongoose, settings) => {
 
 
 
-   function markAsAnswered(challenge_id){
+   function markAsAnswered(application, challenge_id){
+      // *Getting the collections models:
+      const Challenge = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CHALLENGE);
+
       return Challenge
          .findOne({ _id: challenge_id })
          .exec()

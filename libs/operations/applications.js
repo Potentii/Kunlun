@@ -2,20 +2,23 @@
 const uuid = require('uuid');
 const cry = require('../tools/cry');
 const KunlunError = require('../errors/kunlun');
+const database = require('../repository/database');
+const conns = require('../repository/connections');
 const { COLLECTIONS } = require('../repository/model/meta');
 const { KUNLUN_ERR_CODES } = require('../errors/codes');
+const ApplicationModelSynchronizer = require('../repository/model/synchronizer/application-model-synchronizer');
 
 
 
 /**
  * Builds the applications operations
- * @param  {Mongoose} mongoose The mongoose instance
- * @param  {Object} settings   The settings to configure the applications operations
- * @return {Object}            The available operations object
+ * @param  {Kunlun} kunlun   The Kunlun module instance
+ * @param  {Object} settings The settings to configure the applications operations
+ * @return {Object}          The available operations object
  */
-module.exports = (mongoose, settings) => {
+module.exports = (kunlun, settings) => {
    // *Getting the collections models:
-   const Application = mongoose.model(COLLECTIONS.APPLICATION);
+   const Application = conns.get(conns.NAMES.READ_WRITE).model(COLLECTIONS.APPLICATION);
 
 
 
@@ -29,6 +32,13 @@ module.exports = (mongoose, settings) => {
       // TODO create an '_admin' field in Application collection, so the admin creator can be referenced
       // TODO or just create a separated logging collection for that
 
+      // *Generating the application database name:
+      const database_name = kunlun.settings.connections.database + '_' + name;
+
+      // *Throwing an kunlun error, if the database name gets larger than the maximum supported by mongo, which is 64 characters:
+      if(database_name.length >= 64)
+         return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.APPLICATION.NAME.INVALID, 'The application name must have ' + (63 - (kunlun.settings.connections.database.length + 2)) + ' characters or fewer'));
+
       // *Generating the token:
       const token = uuid.v4();
 
@@ -38,11 +48,27 @@ module.exports = (mongoose, settings) => {
       // *Hashing the token using the generated salt:
       const hashed_token = cry.hashSync('sha256', salt + token).toString('hex');
 
+      let id = null;
+
       // *Adding a new client application:
-      return new Application({ name, token: hashed_token, salt })
+      return new Application({ name, token: hashed_token, salt, database: database_name })
          .save()
          .then(application_created => {
-            return { id: application_created._id, token };
+            // *Storing the created application id:
+            id = application_created._id;
+
+            // *Connecting to, and synchronizing the application database using the read-write mongo user:
+            return conns.registerAndConnectAndSync(conns.NAMES.fromApplication(name), {
+               database: database_name,
+               host:     kunlun.settings.connections.host,
+               port:     kunlun.settings.connections.port,
+               user:     kunlun.settings.connections.roles.read_write.username,
+               pass:     kunlun.settings.connections.roles.read_write.password
+            }, new ApplicationModelSynchronizer());
+         })
+         .then(() => {
+            // *Returning the data:
+            return { id, token };
          })
          .catch(err => {
             // *Checking if the error has been thrown by the database:
@@ -59,7 +85,7 @@ module.exports = (mongoose, settings) => {
             if(err.name === 'ValidationError'){
                // *If it has:
                // *Checking the error kinds for name:
-               if(err.errors.name.kind === 'required')
+               if(err.errors.name && err.errors.name.kind === 'required')
                   throw new KunlunError(KUNLUN_ERR_CODES.APPLICATION.NAME.MISSING);
             }
 
@@ -70,6 +96,59 @@ module.exports = (mongoose, settings) => {
 
 
 
+   /**
+    * Removes an application by its name
+    *  It will erase all the application related info, but its administrative logs
+    * @param  {Admin} admin             The admin who is trying to do this operation
+    * @param  {String} application_name The name of the application to be removed
+    * @return {Promise}                 It resolves if everything went fine, or rejects on any error
+    */
+   function remove(admin, application_name){
+      // *Declaring the application variable:
+      let application = null;
+
+      // *Searching for applications that has the given name:
+      return Application
+         .findOne({ name: application_name })
+         .exec()
+         .then(application_found => {
+            // *Storing the found application:
+            application = application_found;
+            // *Checking if it could find something:
+            if(application){
+               // *If it could:
+               // *Connecting to the application's database:
+               return database.connect({
+                  database: application.database,
+                  host:     kunlun.settings.connections.host,
+                  port:     kunlun.settings.connections.port,
+                  user:     kunlun.settings.connections.roles.db_admin.username,
+                  pass:     kunlun.settings.connections.roles.db_admin.password
+               })
+               .then(conn => {
+                  // *Erasing the database:
+                  return conn.dropDatabase()
+                     // *Disconnecting from the database:
+                     .then(() => database.disconnect(conn));
+               });
+            } else{
+               // *If it couldn't:
+               // *Throwing an kunlun error, as no application could be found with the provided name:
+               throw new KunlunError(KUNLUN_ERR_CODES.APPLICATION.NAME.NOTFOUND, 'Could\'t find any application with the given name');
+            }
+         })
+         .then(() => {
+            // *Removing the application instance:
+            return Application
+               .remove({ _id: application._id })
+               .exec();
+         });
+
+         // TODO log this operation
+   }
+
+
+
    // *Returning the routes:
-   return { add };
+   return { add, remove };
 };

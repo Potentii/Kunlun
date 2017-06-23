@@ -1,7 +1,7 @@
 // *Getting the needed modules:
 const uuid = require('uuid');
 const { expect } = require('chai');
-const auth = require('../tools/auth-service');
+const kunlun = require('../tools/kunlun-service');
 const KunlunError = require('../../libs/errors/kunlun');
 
 
@@ -11,13 +11,16 @@ describe('Admin', function(){
 
 
    it('Registers a valid admin', function(){
+      // *Increasing the timeout for this task:
+      this.timeout(5000);
+
       // *Generating a random username:
       const username = uuid.v4();
       // *Setting a default password:
       const password = SIMPLE_PASSWORD;
 
       // *Adding a valid admin:
-      return auth.get().admins.add(undefined, username, password)
+      return kunlun.get().admins.add(undefined, username, password)
          .then(result => {
             // *Expecting the result to have an id:
             expect(result).to.have.property('id');
@@ -34,7 +37,7 @@ describe('Admin', function(){
          const password = SIMPLE_PASSWORD;
 
          // *Adding an admin without username:
-         return auth.get().admins.add(undefined, username, password)
+         return kunlun.get().admins.add(undefined, username, password)
          // *Throwing an error, as this operation should not have been successful:
          .then(() => Promise.reject(new Error()))
          .catch(err => {
@@ -52,9 +55,9 @@ describe('Admin', function(){
          const password = SIMPLE_PASSWORD;
 
          // *Adding a valid admin:
-         return auth.get().admins.add(undefined, username, password)
+         return kunlun.get().admins.add(undefined, username, password)
             .then(result => {
-               return auth.get().admins.add(undefined, username, password)
+               return kunlun.get().admins.add(undefined, username, password)
                   // *Throwing an error, as this operation should not have been successful:
                   .then(() => Promise.reject(new Error()))
                   .catch(err => {
@@ -76,7 +79,7 @@ describe('Admin', function(){
          const password = undefined;
 
          // *Adding an admin without password:
-         return auth.get().admins.add(undefined, username, password)
+         return kunlun.get().admins.add(undefined, username, password)
          // *Throwing an error, as this operation should not have been successful:
          .then(() => Promise.reject(new Error()))
          .catch(err => {

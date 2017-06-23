@@ -1,10 +1,12 @@
+// *Getting the Schema class:
+const { Schema } = require('mongoose');
 // *Getting the common regex:
 const COMMON_REGEX = require('../../../tools/common-regex');
 
 
 
 // *Exporting this module as a function:
-module.exports = Schema => {
+module.exports = () => {
 
 
 
@@ -25,6 +27,12 @@ module.exports = Schema => {
          type: String,
          required: true,
          match: [COMMON_REGEX.UUIDV4, 'Invalid salt. It must be an UUID-V4 string.']
+      },
+
+      database: {
+         type: String,
+         unique: true,
+         required: true
       },
 
       date: {

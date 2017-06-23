@@ -1,3 +1,5 @@
+// *Getting the Schema class:
+const { Schema } = require('mongoose');
 // *Getting the schemas names:
 const { COLLECTIONS } = require('../meta');
 // *Getting the common regex:
@@ -6,7 +8,7 @@ const COMMON_REGEX = require('../../../tools/common-regex');
 
 
 // *Exporting this module as a function:
-module.exports = Schema => {
+module.exports = () => {
 
 
 
@@ -62,12 +64,6 @@ module.exports = Schema => {
          type: String,
          required: true,
          match: [COMMON_REGEX.UUIDV4, 'Invalid server secret. It must be an UUID-V4 string.']
-      },
-
-      _application: {
-         type: Schema.Types.ObjectId,
-         ref: COLLECTIONS.APPLICATION,
-         required: true
       },
 
       date: {
