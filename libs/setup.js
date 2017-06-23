@@ -2,10 +2,6 @@
 const conns = require('./repository/connections');
 const Kunlun = require('./kunlun');
 
-// TODO remove unused conn names
-// TODO remove applications after the tests
-// TODO conn.getFromApplication(application_name);
-//      or conn.get(conn.NAMES.fromApplication(application_name));
 
 
 /**
@@ -33,19 +29,24 @@ function deploy(settings){
       ])
 
       .then(() => {
+         // *Getting the collections names:
          const { COLLECTIONS } = require('./repository/model/meta');
          // *Getting the collections models:
          const Application = conns.get(conns.NAMES.READ_WRITE).model(COLLECTIONS.APPLICATION);
 
+         // *Retrieving all the applications registered:
          return Application
             .find()
-            .exec()
+            .exec();
       })
 
       .then(applications_found => {
+         // *Declaring the connection tasks list:
          const apps_connection_tasks = [];
 
+         // *Getting each application:
          for(let application of applications_found){
+            // *Connecting and synchronizing on each application's database:
             apps_connection_tasks.push(conns.registerAndConnectAndSync(
                conns.NAMES.fromApplication(application.name),
                {
@@ -58,6 +59,7 @@ function deploy(settings){
                new ApplicationModelSynchronizer()));
          }
 
+         // *Waiting until all the connections have been established:
          return Promise.all(apps_connection_tasks);
       })
 

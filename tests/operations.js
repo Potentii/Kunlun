@@ -1,5 +1,5 @@
 // *Getting the needed modules:
-const auth = require('./tools/auth-service');
+const kunlun = require('./tools/kunlun-service');
 
 
 
@@ -48,7 +48,7 @@ describe('operations', function(){
          })
 
          // *Storing the kunlun service instance inside a cache, so it can be tested through multiple scripts:
-         .then(auth_service => auth.set(auth_service));
+         .then(kunlun_service => kunlun.set(kunlun_service));
    });
 
 

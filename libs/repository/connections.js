@@ -14,6 +14,12 @@ const NAMES = Object.freeze({
    DB_ADMIN:   'db-admin',
    READ_WRITE: 'read-write',
    USER_ADMIN: 'user-admin',
+
+   /**
+    * Builds a default connection name, given the application name
+    * @param  {String} application_name The application name
+    * @return {String}                  The connection name
+    */
    fromApplication(application_name){
       return application_name + '-app-connection';
    }

@@ -1,11 +1,19 @@
+// *Requiring the needed modules:
+const { KUNLUN_ERR_CODES } = require('./errors/codes');
+
+
+
 /**
- * The Kunlun service itself
+ * The Kunlun service API entry point
  * @class
  */
 class Kunlun {
+   
    constructor(settings){
+      // *Setting the configurations:
       this._settings = Object.freeze(settings);
 
+      // *Building the operations map:
       this._operations = Object.freeze({
          admins:       require('./operations/admins')(this, this._settings.admins),
          applications: require('./operations/applications')(this, this._settings.applications),
@@ -14,12 +22,12 @@ class Kunlun {
          accesses:     require('./operations/accesses')(this, this._settings.accesses)*/
       });
 
-      const { KUNLUN_ERR_CODES } = require('./errors/codes');
-
+      // *Building the errors object:
       this._errors = Object.freeze({
          KUNLUN_ERR_CODES
       });
 
+      // *Building the types map:
       this._types = Object.freeze({
          Kunlun,
          KunlunError: require('./errors/kunlun')
@@ -63,4 +71,6 @@ class Kunlun {
 }
 
 
+
+// *Exporting this class:
 module.exports = Kunlun;

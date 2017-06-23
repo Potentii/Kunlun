@@ -2,6 +2,7 @@
 const uuid = require('uuid');
 const cry = require('../tools/cry');
 const KunlunError = require('../errors/kunlun');
+const database = require('../repository/database');
 const conns = require('../repository/connections');
 const { COLLECTIONS } = require('../repository/model/meta');
 const { KUNLUN_ERR_CODES } = require('../errors/codes');
@@ -34,9 +35,9 @@ module.exports = (kunlun, settings) => {
       // *Generating the application database name:
       const database_name = kunlun.settings.connections.database + '_' + name;
 
-      // *Throwing an error, if the database name gets larger than the maximum supported by mongo, which is 64 characters:
+      // *Throwing an kunlun error, if the database name gets larger than the maximum supported by mongo, which is 64 characters:
       if(database_name.length >= 64)
-         throw new Error('The application name must have ' + (63 - (kunlun.settings.connections.database.length + 2)) + ' characters or fewer');
+         return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.APPLICATION.NAME.INVALID, 'The application name must have ' + (63 - (kunlun.settings.connections.database.length + 2)) + ' characters or fewer'));
 
       // *Generating the token:
       const token = uuid.v4();
@@ -103,6 +104,7 @@ module.exports = (kunlun, settings) => {
     * @return {Promise}                 It resolves if everything went fine, or rejects on any error
     */
    function remove(admin, application_name){
+      // *Declaring the application variable:
       let application = null;
 
       // *Searching for applications that has the given name:
@@ -110,10 +112,12 @@ module.exports = (kunlun, settings) => {
          .findOne({ name: application_name })
          .exec()
          .then(application_found => {
+            // *Storing the found application:
             application = application_found;
+            // *Checking if it could find something:
             if(application){
-               const database = require('../repository/database');
-
+               // *If it could:
+               // *Connecting to the application's database:
                return database.connect({
                   database: application.database,
                   host:     kunlun.settings.connections.host,
@@ -122,17 +126,22 @@ module.exports = (kunlun, settings) => {
                   pass:     kunlun.settings.connections.roles.db_admin.password
                })
                .then(conn => {
+                  // *Erasing the database:
                   return conn.dropDatabase()
+                     // *Disconnecting from the database:
                      .then(() => database.disconnect(conn));
                });
             } else{
-               throw new Error() // TODO
+               // *If it couldn't:
+               // *Throwing an kunlun error, as no application could be found with the provided name:
+               throw new KunlunError(KUNLUN_ERR_CODES.APPLICATION.NAME.NOTFOUND, 'Could\'t find any application with the given name');
             }
          })
          .then(() => {
+            // *Removing the application instance:
             return Application
                .remove({ _id: application._id })
-               .exec()
+               .exec();
          });
 
          // TODO log this operation
