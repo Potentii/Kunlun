@@ -11,24 +11,36 @@ module.exports = () => {
 
 
    const Application = new Schema({
+      /**
+       * The application name in plain text
+       */
       name: {
          type: String,
          required: true,
          unique: true,
-         match: [/^[a-zA-Z0-9\_\-]+$/, 'Invalid service name']
+         match: [/^[a-zA-Z0-9\_\-]+$/, 'Invalid application name']
       },
 
+      /**
+       * A salted and hashed version of the generated token (hex encoded)
+       */
       token: {
          type: String,
-         required: true,
+         required: true
       },
 
+      /**
+       * The token hash salt
+       */
       salt: {
          type: String,
          required: true,
          match: [COMMON_REGEX.UUIDV4, 'Invalid salt. It must be an UUID-V4 string.']
       },
 
+      /**
+       * The database name this application will store its users info
+       */
       database: {
          type: String,
          unique: true,

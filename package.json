@@ -1,10 +1,11 @@
 {
-  "name": "kunlun",
-  "version": "1.0.0",
-  "description": "",
+  "name": "kunlun-core",
+  "version": "0.0.1",
+  "description": "SCRAM/OAuth2-based auth module",
   "main": "main.js",
   "files": [
     "LICENSE.txt",
+    "README.md",
     "main.js",
     "libs/",
     "tests/"

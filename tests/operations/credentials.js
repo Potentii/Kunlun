@@ -14,6 +14,8 @@ describe('Credentials', function(){
 
 
    before('Creating an application', function(){
+      // *Increasing the timeout for this task:
+      this.timeout(5000);
       const application_name = uuid.v4();
       return kunlun.get().applications.add(null, application_name)
          .then(result => {
@@ -26,6 +28,8 @@ describe('Credentials', function(){
 
 
    after('Removing the application', function(){
+      // *Increasing the timeout for this task:
+      this.timeout(5000);
       return kunlun.get().applications.remove(undefined, application.name);
    });
 

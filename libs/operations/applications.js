@@ -1,5 +1,6 @@
 // *Requiring the needed modules:
 const uuid = require('uuid');
+const crypto = require('crypto');
 const cry = require('../tools/cry');
 const KunlunError = require('../errors/kunlun');
 const database = require('../repository/database');
@@ -46,7 +47,7 @@ module.exports = (kunlun, settings) => {
       const salt = uuid.v4();
 
       // *Hashing the token using the generated salt:
-      const hashed_token = cry.hashSync('sha256', salt + token).toString('hex');
+      const hashed_token = cry.hashSync('sha256', new Buffer(salt + token, 'utf8')).toString('hex');
 
       let id = null;
 
@@ -149,6 +150,43 @@ module.exports = (kunlun, settings) => {
 
 
 
+   /**
+    * Checks if the given name and token matches
+    * @param  {String} name  The application name
+    * @param  {String} token The application token (plain text utf8 encoded)
+    * @return {Promise}      A promise that resolves if it could be authenticated, or rejects if it couldn't, or if some error occur
+    */
+   function authenticate(name, token){
+      // *Rejecting into an kunlun error, as the given token isn't of the valid type:
+      if(typeof token !== 'string')
+         return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.APPLICATION.TOKEN.INVALID, 'The given token is not valid'));
+
+      // *Searching for an application with the given name:
+      return Application
+         .findOne({ name })
+         .select('token salt')
+         .exec()
+         .then(application_found => {
+            // *Checking if the search has returned something:
+            if(application_found){
+               // *If it has:
+               // *Hashing the given token using the salt:
+               const hashed_given_token = cry.hashSync('sha256', new Buffer(application_found.salt + token, 'utf8'));
+               // *Checking whether the credentials matches or not:
+               if(!crypto.timingSafeEqual(new Buffer(application_found.token, 'hex'), hashed_given_token))
+                  // *If it doesn't match:
+                  // *Throwing an kunlun error, as the given token/name doesn't match:
+                  throw new KunlunError(KUNLUN_ERR_CODES.APPLICATION.TOKEN.INCORRECT, 'The given token doesn\'t matches the actual one');
+            } else{
+               // *If it hasn't found anything:
+               // *Throwing an kunlun error, as the given application name doesn't exist:
+               throw new KunlunError(KUNLUN_ERR_CODES.APPLICATION.NAME.NOTFOUND, 'There isn\'t any application with the given name');
+            }
+         });
+   }
+
+
+
    // *Returning the routes:
-   return { add, remove };
+   return { add, remove, authenticate };
 };

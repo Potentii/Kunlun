@@ -10,10 +10,8 @@ const db = require('./database');
  * @type {Object}
  */
 const NAMES = Object.freeze({
-   READ:       'read',
    DB_ADMIN:   'db-admin',
    READ_WRITE: 'read-write',
-   USER_ADMIN: 'user-admin',
 
    /**
     * Builds a default connection name, given the application name
