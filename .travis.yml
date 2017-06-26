@@ -9,6 +9,7 @@ services:
 before_script:
    - sleep 8
    - mongo admin --eval "db.addUser({user:'root',pwd:'root',roles:['root']});"
+   - sleep 8
    - mongo admin -u "root" -p "root" --authenticationDatabase "admin" --eval "db.addUser({user:'db-admin-kunlun-test',pwd:'abc123',roles:['dbAdminAnyDatabase']});"
    - mongo admin -u "root" -p "root" --authenticationDatabase "admin" --eval "db.addUser({user:'read-write-kunlun-test',pwd:'abc123',roles:['readWriteAnyDatabase']});"
 
