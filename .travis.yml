@@ -8,8 +8,9 @@ services:
 
 before_script:
    - sleep 8
-   - mongo admin --eval "db.addUser({user:'db-admin-kunlun-test22',pwd:'abc123',roles:['dbAdminAnyDatabase']});"
-   - mongo admin --eval "db.addUser({user:'read-write-kunlun-test',pwd:'abc123',roles:['readWriteAnyDatabase']});"
+   - mongo admin --eval "db.addUser({user:'root',pwd:'root',roles:['root']});"
+   - mongo admin -u "root" -p "root" --authenticationDatabase "admin" --eval "db.addUser({user:'db-admin-kunlun-test',pwd:'abc123',roles:['dbAdminAnyDatabase']});"
+   - mongo admin -u "root" -p "root" --authenticationDatabase "admin" --eval "db.addUser({user:'read-write-kunlun-test',pwd:'abc123',roles:['readWriteAnyDatabase']});"
 
 cache:
    directories:
