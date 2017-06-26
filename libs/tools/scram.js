@@ -30,7 +30,7 @@ class ServerSignatureGenerator {
 
 
 
-function generateChallengeable(password, client_secret){
+function generateChallengeable(password){
    // *Returning the promise:
    return new Promise((resolve, reject) => {
       // *Generating the password hash salt:
@@ -44,12 +44,12 @@ function generateChallengeable(password, client_secret){
 
       // *Hashing the password using the generated salt:
       const hashed_password = cry.pbkdf2Sync('sha256', 256, new Buffer(password, 'utf8'), new Buffer(salt, 'utf8'), it);
-
+      /*
       // *Computing the client key and its hashed version:
       const client_key = cry.hmacSync('sha256', new Buffer(client_secret, 'utf8'), hashed_password);
       // *Getting the hashed version of the client key to be stored:
       const hashed_client_key = cry.hashSync('sha256', client_key);
-
+      */
       // *Computing the server key:
       const server_key = cry.hmacSync('sha256', new Buffer(server_secret, 'utf8'), hashed_password);
 
@@ -58,7 +58,7 @@ function generateChallengeable(password, client_secret){
          hashed_password,
          salt,
          it,
-         hashed_client_key,
+         /*hashed_client_key,*/
          server_secret
       });
    });
@@ -72,12 +72,16 @@ function combineNonces(client_nonce, server_nonce){
 
 
 
-function validateClientProof(client_proof_base64, username, hashed_password, salt, it, client_key, client_nonce, server_secret, server_nonce){
+function validateClientProof(client_proof_base64, username, hashed_password, salt, it, client_nonce, server_secret, server_nonce, client_secret){
    return new Promise((resolve, reject) => {
       // *Getting the client proof as a buffer:
       const client_proof = new Buffer(client_proof_base64, 'base64');
-      // *Getting the stored hashed client key as a buffer:
-      const hashed_client_key = new Buffer(client_key, 'hex');
+
+      // *Computing the client key and its hashed version:
+      const client_key = cry.hmacSync('sha256', new Buffer(client_secret, 'utf8'), hashed_password);
+      // *Getting the hashed version of the client key to be stored:
+      const hashed_client_key = cry.hashSync('sha256', client_key);
+
       // *Generating the combined nonce:
       const combined_nonce = client_nonce + server_nonce;
       // *Generating the auth message as a buffer:

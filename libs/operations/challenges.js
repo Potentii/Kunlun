@@ -22,13 +22,13 @@ module.exports = (kunlun, settings) => {
    /**
     * Starts a new SCRAM flow
     *  It's an implementation of the SCRAM's 'server-first-message'
-    * @param  {Application} application  The target application to look for the credentials
-    * @param  {String} username          The username that this new challenge'll be related to
-    * @param  {String} client_nonce      The client random nonce
-    * @return {Promise}                  It resolves into the server fist message response, or rejects into an error
+    * @param  {String} application_name The target application name to look for the credentials
+    * @param  {String} username         The username that this new challenge'll be related to
+    * @param  {String} client_nonce     The client random nonce
+    * @return {Promise}                 It resolves into the server fist message response, or rejects into an error
     * @see {@link https://tools.ietf.org/html/rfc5802#section-5|RFC5802 - 5. SCRAM Authentication Exchange}
     */
-   function generateNew(application, username, client_nonce){
+   function generateNew(application_name, username, client_nonce){
       // *Rejecting into an kunlun error, if the username is not a string:
       if(typeof username !== 'string')
          return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.USERNAME.TYPE, 'The username must be a string'));
@@ -41,8 +41,8 @@ module.exports = (kunlun, settings) => {
       let credential = null;
 
       // *Getting the collections models:
-      const Challenge  = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CHALLENGE);
-      const Credential = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CREDENTIAL);
+      const Challenge  = conns.get(conns.NAMES.fromApplication(application_name)).model(COLLECTIONS.CHALLENGE);
+      const Credential = conns.get(conns.NAMES.fromApplication(application_name)).model(COLLECTIONS.CREDENTIAL);
 
       // *Searching for a credential with the given username:
       return Credential
@@ -111,13 +111,14 @@ module.exports = (kunlun, settings) => {
    /**
     * Checks if the challenge answer is correct
     *  It's an implementation of the SCRAM's 'server-final-message'
-    * @param  {Application} application      The target application to look for the credentials
+    * @param  {String} application_name      The target application name to look for the credentials
     * @param  {String|ObjectId} challenge_id The challenge this answer's related to
     * @param  {String} client_proof          The calculated client proof (base64 encoded)
+    * @param  {String} client_secret         The client secret used to calculate the client proof
     * @return {Promise}                      It resolves into the server final message response, or rejects into an error
     * @see {@link https://tools.ietf.org/html/rfc5802#section-5|RFC5802 - 5. SCRAM Authentication Exchange}
     */
-   function checkAnswer(application, challenge_id, client_proof){
+   function checkAnswer(application_name, challenge_id, client_proof, client_secret){
       // *Rejecting into an kunlun error, if the challenge_id is not a string:
       if(typeof challenge_id !== 'string' && !(challenge_id instanceof mongoose.Types.ObjectId))
          return Promise.reject(new KunlunError(KUNLUN_ERR_CODES.CHALLENGE.TYPE, 'The challenge id must be a string or a mongoose ObjectId'));
@@ -127,9 +128,9 @@ module.exports = (kunlun, settings) => {
       let credential = null;
 
       // *Getting the collections models:
-      const Challenge  = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CHALLENGE);
-      const Credential = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CREDENTIAL);
-      const Access     = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.ACCESS);
+      const Challenge  = conns.get(conns.NAMES.fromApplication(application_name)).model(COLLECTIONS.CHALLENGE);
+      const Credential = conns.get(conns.NAMES.fromApplication(application_name)).model(COLLECTIONS.CREDENTIAL);
+      const Access     = conns.get(conns.NAMES.fromApplication(application_name)).model(COLLECTIONS.ACCESS);
 
       // *Fetching the provided challenge, only if it hasn't been answered yet:
       return Challenge
@@ -164,13 +165,13 @@ module.exports = (kunlun, settings) => {
                return SCRAM.validateClientProof(
                   client_proof,
                   credential.username,
-                  credential.password,
+                  new Buffer(credential.password, 'hex'),
                   credential.salt,
                   credential.it,
-                  credential.client_key,
                   challenge.client_nonce,
                   credential.server_secret,
-                  challenge.server_nonce);
+                  challenge.server_nonce,
+                  client_secret);
              else
                // *If it doesn't:
                // *Throwing a kunlun error, as the challenge credential doesn't exist:
@@ -213,9 +214,9 @@ module.exports = (kunlun, settings) => {
          })
 
          // *Marking the challenge as answered:
-         .then(result => markAsAnswered(application, challenge_id)
+         .then(result => markAsAnswered(application_name, challenge_id)
                .then(() => result),
-            err => markAsAnswered(application, challenge_id)
+            err => markAsAnswered(application_name, challenge_id)
                .then(() => Promise.reject(err)))
 
          .catch(err => {
@@ -236,9 +237,9 @@ module.exports = (kunlun, settings) => {
 
 
 
-   function markAsAnswered(application, challenge_id){
+   function markAsAnswered(application_name, challenge_id){
       // *Getting the collections models:
-      const Challenge = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CHALLENGE);
+      const Challenge = conns.get(conns.NAMES.fromApplication(application_name)).model(COLLECTIONS.CHALLENGE);
 
       return Challenge
          .findOne({ _id: challenge_id })

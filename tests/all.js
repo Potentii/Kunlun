@@ -1,7 +1,7 @@
 'use strict';
 
 // *Parsing the test environment file:
-const env_parsing = require('dotenv').config({ path: './tests/.env' });
+const env_parsing = require('dotenv').config({ path: './tests/.env.test' });
 
 // *Throwing any errors ocurred when parsing the file:
 if(env_parsing.error)

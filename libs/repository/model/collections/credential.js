@@ -51,11 +51,11 @@ module.exports = () => {
 
       /**
        * The hashed client key (hex encoded)
-       */
+       *//*
       client_key: {
          type: String,
          required: true
-      },
+      },*/
 
       /**
        * The actual server secret in plain text

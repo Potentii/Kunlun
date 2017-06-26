@@ -21,23 +21,21 @@ module.exports = (kunlun, settings) => {
 
    /**
     * Creates a new user credential in the database
-    * @param  {Application} application The application that owns this user credentials
+    * @param  {String} application_name The application name that owns this user credentials
     * @param  {String} username         The credentials username (must be unique)
     * @param  {String} password         The credentials password
     * @return {Promise}                 A promise containing the operation result or an error
     */
-   function add(application, username, password, client_secret){
-      // TODO check and document client_secret
-      // TODO remove the client_secret from here, put it in the SCRAM flow instead
+   function add(application_name, username, password){
       try{
          // *Validating the username and password against the configured settings:
          validateUsername(username, settings.username);
          validatePassword(password, settings.password);
 
-         return SCRAM.generateChallengeable(password, client_secret)
+         return SCRAM.generateChallengeable(password)
             .then(challengeable => {
                // *Getting the collections models:
-               const Credential = conns.get(conns.NAMES.fromApplication(application.name)).model(COLLECTIONS.CREDENTIAL);
+               const Credential = conns.get(conns.NAMES.fromApplication(application_name)).model(COLLECTIONS.CREDENTIAL);
 
                // *Adding a new credential:
                return new Credential({
@@ -45,7 +43,7 @@ module.exports = (kunlun, settings) => {
                      password:      challengeable.hashed_password.toString('hex'),
                      salt:          challengeable.salt,
                      it:            challengeable.it,
-                     client_key:    challengeable.hashed_client_key.toString('hex'),
+                     /*client_key:    challengeable.hashed_client_key.toString('hex'),*/
                      server_secret: challengeable.server_secret
                   })
                   .save();

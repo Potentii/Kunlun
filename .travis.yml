@@ -1,0 +1,23 @@
+language: node_js
+
+node_js:
+   - "7"
+
+services:
+   - mongodb
+
+before_script:
+   - sleep 8
+   - mongo admin --eval "db.createUser({user:'db-admin-kunlun-test',pwd:'abc123',roles:['dbAdminAnyDatabase']});"
+   - mongo admin --eval "db.createUser({user:'read-write-kunlun-test',pwd:'abc123',roles:['readWriteAnyDatabase']});"
+
+cache:
+   directories:
+      - node_modules
+
+notifications:
+   email: false
+
+branches:
+   only:
+      - master

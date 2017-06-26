@@ -9,7 +9,7 @@ const KunlunError = require('../../libs/errors/kunlun');
 describe('Credentials', function(){
    const SIMPLE_PASSWORD = 'abc';
    // *Generating a default random client secret:
-   const client_secret = uuid.v4();
+   //const client_secret = uuid.v4();
    let application = null;
 
 
@@ -41,7 +41,7 @@ describe('Credentials', function(){
       const password = SIMPLE_PASSWORD;
 
       // *Adding a valid credential:
-      return kunlun.get().credentials.add(application, username, password, client_secret)
+      return kunlun.get().credentials.add(application.name, username, password)
          .then(result => {
             // *Expecting the result to have an id:
             expect(result).to.have.property('id');
@@ -58,7 +58,7 @@ describe('Credentials', function(){
          const password = SIMPLE_PASSWORD;
 
          // *Adding a credential without username:
-         return kunlun.get().credentials.add(application, username, password, client_secret)
+         return kunlun.get().credentials.add(application.name, username, password)
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -75,10 +75,10 @@ describe('Credentials', function(){
          const password = SIMPLE_PASSWORD;
 
          // *Adding a valid credential:
-         return kunlun.get().credentials.add(application, username, password, client_secret)
+         return kunlun.get().credentials.add(application.name, username, password)
             .then(result => {
                // *Assing the same credential:
-               return kunlun.get().credentials.add(application, username, password, client_secret)
+               return kunlun.get().credentials.add(application.name, username, password)
                   // *Throwing an error, as this operation should not have been successful:
                   .then(() => Promise.reject(new Error()))
                   .catch(err => {
@@ -100,7 +100,7 @@ describe('Credentials', function(){
          }
 
          // *Adding a credential with a short username:
-         return kunlun.get().credentials.add(application, username, password, client_secret)
+         return kunlun.get().credentials.add(application.name, username, password)
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -121,7 +121,7 @@ describe('Credentials', function(){
          }
 
          // *Adding a credential with a long username:
-         return kunlun.get().credentials.add(application, username, password, client_secret)
+         return kunlun.get().credentials.add(application.name, username, password)
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -142,7 +142,7 @@ describe('Credentials', function(){
          const password = undefined;
 
          // *Adding a credential without password:
-         return kunlun.get().credentials.add(application, username, password, client_secret)
+         return kunlun.get().credentials.add(application.name, username, password)
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -163,7 +163,7 @@ describe('Credentials', function(){
          }
 
          // *Adding a credential with a short password:
-         return kunlun.get().credentials.add(application, username, password, client_secret)
+         return kunlun.get().credentials.add(application.name, username, password)
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -184,7 +184,7 @@ describe('Credentials', function(){
          }
 
          // *Adding a credential with a long password:
-         return kunlun.get().credentials.add(application, username, password, client_secret)
+         return kunlun.get().credentials.add(application.name, username, password)
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {

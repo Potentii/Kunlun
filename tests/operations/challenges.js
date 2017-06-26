@@ -12,7 +12,6 @@ describe('Challenges', function(){
 
    let username;
    let password;
-   let client_secret;
    let application = null;
 
 
@@ -43,21 +42,21 @@ describe('Challenges', function(){
       // *Setting a default password:
       password = SIMPLE_PASSWORD;
 
-      client_secret = uuid.v4();
-
       // *Adding a valid credential:
-      return kunlun.get().credentials.add(application, username, password, client_secret);
+      return kunlun.get().credentials.add(application.name, username, password);
    });
 
 
    it('Creates a new access with a valid SCRAM flow', function(){
       // *Generating a random nonce:
       const client_nonce = uuid.v4();
+      // *Generating a random secret:
+      const client_secret = uuid.v4();
       // *initializing the scram client:
       const scram_client = new SCRAMClient(username, password, client_nonce, client_secret);
 
       // *Starting a new challenge:
-      return kunlun.get().challenges.generateNew(application, username, client_nonce)
+      return kunlun.get().challenges.generateNew(application.name, username, client_nonce)
          .then(result => {
             // *Expecting the result to have the challenge id:
             expect(result).to.have.property('id');
@@ -75,7 +74,7 @@ describe('Challenges', function(){
          // *Processing the server-first-message, and generating the challenge answer:
          .then(result => scram_client.handleServerFirstmessage(result.id, result.combined_nonce, result.salt, result.it, result.server_secret))
          // *Sending the challenge answer:
-         .then(result => kunlun.get().challenges.checkAnswer(application, result.id, result.client_proof))
+         .then(result => kunlun.get().challenges.checkAnswer(application.name, result.id, result.client_proof, client_secret))
          .then(result => {
             // *Expecting the result to have the generated access token:
             expect(result).to.have.property('token');
@@ -96,11 +95,13 @@ describe('Challenges', function(){
          const inexistent_username = '--inexistent-username--';
          // *Generating a random nonce:
          const client_nonce = uuid.v4();
+         // *Generating a random secret:
+         const client_secret = uuid.v4();
          // *initializing the scram client:
-         const scram_client = new SCRAMClient(inexistent_username, password, client_nonce, client_secret);
+         const scram_client = new SCRAMClient(inexistent_username, password, client_nonce);
 
          // *Starting a new challenge with an inexistent username:
-         return kunlun.get().challenges.generateNew(application, inexistent_username, client_nonce)
+         return kunlun.get().challenges.generateNew(application.name, inexistent_username, client_nonce)
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -115,11 +116,13 @@ describe('Challenges', function(){
          const invalid_username = null;
          // *Generating a random nonce:
          const client_nonce = uuid.v4();
+         // *Generating a random secret:
+         const client_secret = uuid.v4();
          // *initializing the scram client:
-         const scram_client = new SCRAMClient(invalid_username, password, client_nonce, client_secret);
+         const scram_client = new SCRAMClient(invalid_username, password, client_nonce);
 
          // *Starting a new challenge with an invalid username:
-         return kunlun.get().challenges.generateNew(application, invalid_username, client_nonce)
+         return kunlun.get().challenges.generateNew(application.name, invalid_username, client_nonce)
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -133,10 +136,10 @@ describe('Challenges', function(){
          // *Creating an invalid nonce:
          const invalid_client_nonce = null;
          // *initializing the scram client:
-         const scram_client = new SCRAMClient(username, password, invalid_client_nonce, client_secret);
+         const scram_client = new SCRAMClient(username, password, invalid_client_nonce);
 
          // *Starting a new challenge with an invalid client nonce:
-         return kunlun.get().challenges.generateNew(application, username, invalid_client_nonce)
+         return kunlun.get().challenges.generateNew(application.name, username, invalid_client_nonce)
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -155,15 +158,17 @@ describe('Challenges', function(){
          const inexistent_challenge_id = '--inexistent-id--';
          // *Generating a random nonce:
          const client_nonce = uuid.v4();
+         // *Generating a random secret:
+         const client_secret = uuid.v4();
          // *initializing the scram client:
          const scram_client = new SCRAMClient(username, password, client_nonce, client_secret);
 
          // *Starting a new challenge:
-         return kunlun.get().challenges.generateNew(application, username, client_nonce)
+         return kunlun.get().challenges.generateNew(application.name, username, client_nonce)
             // *Processing the server-first-message, and generating the challenge answer:
             .then(result => scram_client.handleServerFirstmessage(result.id, result.combined_nonce, result.salt, result.it, result.server_secret))
             // *Sending the challenge answer, with an inexistent challenge id:
-            .then(result => kunlun.get().challenges.checkAnswer(application, inexistent_challenge_id, result.client_proof))
+            .then(result => kunlun.get().challenges.checkAnswer(application.name, inexistent_challenge_id, result.client_proof, client_secret))
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -178,15 +183,17 @@ describe('Challenges', function(){
          const invalid_challenge_id = null;
          // *Generating a random nonce:
          const client_nonce = uuid.v4();
+         // *Generating a random secret:
+         const client_secret = uuid.v4();
          // *initializing the scram client:
          const scram_client = new SCRAMClient(username, password, client_nonce, client_secret);
 
          // *Starting a new challenge:
-         return kunlun.get().challenges.generateNew(application, username, client_nonce)
+         return kunlun.get().challenges.generateNew(application.name, username, client_nonce)
             // *Processing the server-first-message, and generating the challenge answer:
             .then(result => scram_client.handleServerFirstmessage(result.id, result.combined_nonce, result.salt, result.it, result.server_secret))
             // *Sending the challenge answer, with an invalid challenge id:
-            .then(result => kunlun.get().challenges.checkAnswer(application, invalid_challenge_id, result.client_proof))
+            .then(result => kunlun.get().challenges.checkAnswer(application.name, invalid_challenge_id, result.client_proof, client_secret))
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -201,15 +208,17 @@ describe('Challenges', function(){
          const incorrect_proof = '--incorrect-proof--';
          // *Generating a random nonce:
          const client_nonce = uuid.v4();
+         // *Generating a random secret:
+         const client_secret = uuid.v4();
          // *initializing the scram client:
          const scram_client = new SCRAMClient(username, password, client_nonce, client_secret);
 
          // *Starting a new challenge:
-         return kunlun.get().challenges.generateNew(application, username, client_nonce)
+         return kunlun.get().challenges.generateNew(application.name, username, client_nonce)
             // *Processing the server-first-message, and generating the challenge answer:
             .then(result => scram_client.handleServerFirstmessage(result.id, result.combined_nonce, result.salt, result.it, result.server_secret))
             // *Sending the challenge answer, with an incorrect proof:
-            .then(result => kunlun.get().challenges.checkAnswer(application, result.id, incorrect_proof))
+            .then(result => kunlun.get().challenges.checkAnswer(application.name, result.id, incorrect_proof, client_secret))
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -222,6 +231,8 @@ describe('Challenges', function(){
       it('Does not allow to answer a successful challenge twice', function(){
          // *Generating a random nonce:
          const client_nonce = uuid.v4();
+         // *Generating a random secret:
+         const client_secret = uuid.v4();
          // *initializing the scram client:
          const scram_client = new SCRAMClient(username, password, client_nonce, client_secret);
 
@@ -229,7 +240,7 @@ describe('Challenges', function(){
          let correct_client_proof;
 
          // *Starting a new challenge:
-         return kunlun.get().challenges.generateNew(application, username, client_nonce)
+         return kunlun.get().challenges.generateNew(application.name, username, client_nonce)
             // *Processing the server-first-message, and generating the challenge answer:
             .then(result => scram_client.handleServerFirstmessage(result.id, result.combined_nonce, result.salt, result.it, result.server_secret))
             .then(result => {
@@ -238,10 +249,10 @@ describe('Challenges', function(){
                // *Storing the correct client proof:
                correct_client_proof = result.client_proof;
                // *Sending the challenge answer:
-               return kunlun.get().challenges.checkAnswer(application, challenge_id, correct_client_proof);
+               return kunlun.get().challenges.checkAnswer(application.name, challenge_id, correct_client_proof, client_secret);
             })
             // *Sending the challenge answer again:
-            .then(() => kunlun.get().challenges.checkAnswer(application, challenge_id, correct_client_proof))
+            .then(() => kunlun.get().challenges.checkAnswer(application.name, challenge_id, correct_client_proof, client_secret))
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
@@ -254,6 +265,8 @@ describe('Challenges', function(){
       it('Does not allow to answer a rejected challenge twice', function(){
          // *Generating a random nonce:
          const client_nonce = uuid.v4();
+         // *Generating a random secret:
+         const client_secret = uuid.v4();
          // *initializing the scram client:
          const scram_client = new SCRAMClient(username, password, client_nonce, client_secret);
 
@@ -261,7 +274,7 @@ describe('Challenges', function(){
          let correct_client_proof;
 
          // *Starting a new challenge:
-         return kunlun.get().challenges.generateNew(application, username, client_nonce)
+         return kunlun.get().challenges.generateNew(application.name, username, client_nonce)
             // *Processing the server-first-message, and generating the challenge answer:
             .then(result => scram_client.handleServerFirstmessage(result.id, result.combined_nonce, result.salt, result.it, result.server_secret))
             .then(result => {
@@ -270,10 +283,10 @@ describe('Challenges', function(){
                // *Storing the correct client proof:
                correct_client_proof = result.client_proof;
                // *Sending the challenge answer, with an incorrect proff, so it gets rejected:
-               return kunlun.get().challenges.checkAnswer(application, challenge_id, 'A' + correct_client_proof);
+               return kunlun.get().challenges.checkAnswer(application.name, challenge_id, 'A' + correct_client_proof, client_secret);
             })
             // *Sending the challenge answer again, this time with the correct answer:
-            .catch(err => kunlun.get().challenges.checkAnswer(application, challenge_id, correct_client_proof))
+            .catch(err => kunlun.get().challenges.checkAnswer(application.name, challenge_id, correct_client_proof, client_secret))
             // *Throwing an error, as this operation should not have been successful:
             .then(() => Promise.reject(new Error()))
             .catch(err => {
