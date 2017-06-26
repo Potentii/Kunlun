@@ -1,21 +1,32 @@
 language: node_js
 
 node_js:
-   - "7"
+   - "8"
 
 services:
    - mongodb
 
 before_script:
-   - sleep 8
-   - mongo admin --eval "db.addUser({user:'root',pwd:'root',roles:['root']});"
-   - sleep 8
-   - mongo admin -u "root" -p "root" --authenticationDatabase "admin" --eval "db.addUser({user:'db-admin-kunlun-test',pwd:'abc123',roles:['dbAdminAnyDatabase']});"
-   - mongo admin -u "root" -p "root" --authenticationDatabase "admin" --eval "db.addUser({user:'read-write-kunlun-test',pwd:'abc123',roles:['readWriteAnyDatabase']});"
+   - sleep 4
+   - mongo admin --eval "db.createUser({user:'root',pwd:'root',roles:['root']});"
+   - sleep 4
+   - mongo admin -u "root" -p "root" --authenticationDatabase "admin" --eval "db.createUser({user:'db-admin-kunlun-test',pwd:'abc123',roles:['dbAdminAnyDatabase']});"
+   - mongo admin -u "root" -p "root" --authenticationDatabase "admin" --eval "db.createUser({user:'read-write-kunlun-test',pwd:'abc123',roles:['readWriteAnyDatabase']});"
+   - sleep 4
 
 cache:
    directories:
       - node_modules
+
+sudo: false
+
+addons:
+   apt:
+      sources:
+         - mongodb-3.0-precise
+      packages:
+         - mongodb-org-server
+         - mongodb-org-shell
 
 notifications:
    email: false
